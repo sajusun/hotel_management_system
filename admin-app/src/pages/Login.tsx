@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from '../lib/axios';
+import { isAxiosError } from 'axios';
+import api from '../lib/axios';
 
 export default function Login() {
   const navigate = useNavigate();
@@ -16,19 +17,24 @@ export default function Login() {
 
     try {
       // 1. Fetch CSRF Cookie
-      await axios.get('/sanctum/csrf-cookie');
+      await api.get('/sanctum/csrf-cookie');
       
       // 2. Attempt Login
-      await axios.post('/api/v1/login', { email, password });
+      await api.post('/api/v1/login', { email, password });
       
       // 3. Navigate to Dashboard
       navigate('/dashboard');
-    } catch (err: any) {
-      if (err.response?.status === 401 || err.response?.status === 422) {
-        setError(err.response.data.message || 'Invalid credentials');
-      } else {
-        setError('Something went wrong. Please try again.');
+    } catch (err: unknown) {
+      if (isAxiosError(err)) {
+        const status = err.response?.status;
+
+        if (status === 401 || status === 422) {
+          setError((err.response?.data as { message?: string } | undefined)?.message || 'Invalid credentials');
+          return;
+        }
       }
+
+      setError('Something went wrong. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -77,9 +83,10 @@ export default function Login() {
           </div>
           <button
             type="submit"
+            disabled={loading}
             className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 px-4 rounded-lg transition-colors mt-2"
           >
-            Sign In
+            {loading ? 'Signing in...' : 'Sign In'}
           </button>
         </form>
       </div>
