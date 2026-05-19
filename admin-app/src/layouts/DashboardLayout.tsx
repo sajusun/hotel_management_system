@@ -42,6 +42,8 @@ export default function DashboardLayout() {
       { name: 'Reservations', path: '/dashboard/reservations', icon: CalendarDays },
       { name: 'Guests', path: '/dashboard/guests', icon: Users },
       { name: 'Billing', path: '/dashboard/billing', icon: Receipt },
+      { name: 'Subscribers', path: '/dashboard/newsletter/subscribers', icon: Bell },
+      { name: 'Support', path: '/dashboard/support', icon: Users },
       { name: 'Settings', path: '/dashboard/settings', icon: Settings },
     ],
     [],
