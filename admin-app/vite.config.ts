@@ -9,5 +9,17 @@ export default defineConfig({
     host: true,
     port: 5173,
     strictPort: true,
+    proxy: {
+      '/sanctum': {
+        target: 'http://backend_hms.test',
+        changeOrigin: true,
+        secure: false,
+      },
+      '/api': {
+        target: 'http://backend_hms.test',
+        changeOrigin: true,
+        secure: false,
+      },
+    },
   },
 })
