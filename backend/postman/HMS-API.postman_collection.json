@@ -1,0 +1,783 @@
+{
+	"info": {
+		"_postman_id": "hms-api-collection-v1",
+		"name": "HMS - Hotel Management System API",
+		"description": "Laravel modular monolith HMS API (v1).\n\nBase path: `{{base_url}}` (default: http://localhost:8000/api/v1)\n\n**Quick start**\n1. Run `php artisan migrate` and `php artisan db:seed --class=HmsSeeder`\n2. Start server: `php artisan serve` or use Laravel Herd\n3. Run **Workflow → Full guest journey** folder in order\n\nCollection variables (`room_id`, `guest_id`, etc.) are auto-set by test scripts on key requests.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8000/api/v1",
+			"type": "string"
+		},
+		{
+			"key": "room_id",
+			"value": "1",
+			"type": "string"
+		},
+		{
+			"key": "guest_id",
+			"value": "1",
+			"type": "string"
+		},
+		{
+			"key": "reservation_id",
+			"value": "1",
+			"type": "string"
+		},
+		{
+			"key": "stay_id",
+			"value": "1",
+			"type": "string"
+		},
+		{
+			"key": "invoice_id",
+			"value": "1",
+			"type": "string"
+		},
+		{
+			"key": "check_in_date",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "check_out_date",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "invoice_total",
+			"value": "",
+			"type": "string"
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"const daysAhead = (n) => {",
+					"    const d = new Date();",
+					"    d.setDate(d.getDate() + n);",
+					"    return d.toISOString().split('T')[0];",
+					"};",
+					"if (!pm.collectionVariables.get('check_in_date')) {",
+					"    pm.collectionVariables.set('check_in_date', daysAhead(7));",
+					"}",
+					"if (!pm.collectionVariables.get('check_out_date')) {",
+					"    pm.collectionVariables.set('check_out_date', daysAhead(10));",
+					"}"
+				]
+			}
+		}
+	],
+	"item": [
+		{
+			"name": "Workflow",
+			"description": "Run these requests in order for an end-to-end demo.",
+			"item": [
+				{
+					"name": "1. Search availability",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/availability?check_in_date={{check_in_date}}&check_out_date={{check_out_date}}&guests_count=2",
+							"host": ["{{base_url}}"],
+							"path": ["availability"],
+							"query": [
+								{
+									"key": "check_in_date",
+									"value": "{{check_in_date}}"
+								},
+								{
+									"key": "check_out_date",
+									"value": "{{check_out_date}}"
+								},
+								{
+									"key": "guests_count",
+									"value": "2"
+								}
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status 200', () => pm.response.to.have.status(200));",
+									"const json = pm.response.json();",
+									"if (json.data && json.data.length > 0) {",
+									"    pm.collectionVariables.set('room_id', json.data[0].id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "2. Create guest",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"first_name\": \"Alice\",\n  \"last_name\": \"Traveler\",\n  \"email\": \"alice.traveler.{{$timestamp}}@example.com\",\n  \"phone\": \"+1-555-0199\",\n  \"document_number\": \"P99887766\"\n}"
+						},
+						"url": "{{base_url}}/guests"
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status 201', () => pm.response.to.have.status(201));",
+									"const json = pm.response.json();",
+									"if (json.data && json.data.id) {",
+									"    pm.collectionVariables.set('guest_id', json.data.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "3. Create reservation",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"room_id\": {{room_id}},\n  \"guest_id\": {{guest_id}},\n  \"check_in_date\": \"{{check_in_date}}\",\n  \"check_out_date\": \"{{check_out_date}}\",\n  \"guests_count\": 2,\n  \"special_requests\": \"Late check-in requested\"\n}"
+						},
+						"url": "{{base_url}}/reservations"
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status 201', () => pm.response.to.have.status(201));",
+									"const json = pm.response.json();",
+									"if (json.data && json.data.id) {",
+									"    pm.collectionVariables.set('reservation_id', json.data.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "4. Check in",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": "{{base_url}}/reservations/{{reservation_id}}/check-in"
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status 201', () => pm.response.to.have.status(201));",
+									"const json = pm.response.json();",
+									"if (json.data) {",
+									"    pm.collectionVariables.set('stay_id', json.data.id);",
+									"    if (json.data.invoice && json.data.invoice.id) {",
+									"        pm.collectionVariables.set('invoice_id', json.data.invoice.id);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "5. Add service charge",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"description\": \"Room service breakfast\",\n  \"unit_price\": 25.00,\n  \"quantity\": 2,\n  \"type\": \"service\"\n}"
+						},
+						"url": "{{base_url}}/invoices/{{invoice_id}}/services"
+					}
+				},
+				{
+					"name": "6. Get invoice (before checkout)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": "{{base_url}}/invoices/{{invoice_id}}"
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status 200', () => pm.response.to.have.status(200));",
+									"const json = pm.response.json();",
+									"if (json.data && json.data.total_amount) {",
+									"    pm.collectionVariables.set('invoice_total', json.data.total_amount);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "7. Check out",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": "{{base_url}}/stays/{{stay_id}}/check-out"
+					}
+				},
+				{
+					"name": "8. Record payment",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"amount\": {{invoice_total}},\n  \"method\": \"card\",\n  \"transaction_reference\": \"TXN-{{$timestamp}}\"\n}"
+						},
+						"url": "{{base_url}}/invoices/{{invoice_id}}/payments"
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"if (!pm.collectionVariables.get('invoice_total')) {",
+									"    pm.collectionVariables.set('invoice_total', '500');",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Rooms",
+			"item": [
+				{
+					"name": "List room types",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": "{{base_url}}/room-types"
+					}
+				},
+				{
+					"name": "List all rooms",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": "{{base_url}}/rooms"
+					}
+				},
+				{
+					"name": "List rooms by status",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/rooms?status=available",
+							"host": ["{{base_url}}"],
+							"path": ["rooms"],
+							"query": [
+								{
+									"key": "status",
+									"value": "available",
+									"description": "available | reserved | occupied | maintenance"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Update room status",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"maintenance\"\n}"
+						},
+						"url": "{{base_url}}/rooms/{{room_id}}/status",
+						"description": "Status values: available, reserved, occupied, maintenance"
+					}
+				}
+			]
+		},
+		{
+			"name": "Guests",
+			"item": [
+				{
+					"name": "List guests",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": "{{base_url}}/guests"
+					}
+				},
+				{
+					"name": "Create guest",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"first_name\": \"Jane\",\n  \"last_name\": \"Doe\",\n  \"email\": \"jane.doe.{{$timestamp}}@example.com\",\n  \"phone\": \"+1-555-0100\",\n  \"document_number\": \"P12345678\",\n  \"notes\": \"VIP guest\"\n}"
+						},
+						"url": "{{base_url}}/guests"
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    const json = pm.response.json();",
+									"    if (json.data && json.data.id) {",
+									"        pm.collectionVariables.set('guest_id', json.data.id);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "Get guest",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": "{{base_url}}/guests/{{guest_id}}"
+					}
+				},
+				{
+					"name": "Update guest",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"phone\": \"+1-555-9999\",\n  \"notes\": \"Updated contact number\"\n}"
+						},
+						"url": "{{base_url}}/guests/{{guest_id}}"
+					}
+				}
+			]
+		},
+		{
+			"name": "Reservations",
+			"item": [
+				{
+					"name": "Search availability",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/availability?check_in_date={{check_in_date}}&check_out_date={{check_out_date}}&room_type_id=1&guests_count=2",
+							"host": ["{{base_url}}"],
+							"path": ["availability"],
+							"query": [
+								{
+									"key": "check_in_date",
+									"value": "{{check_in_date}}",
+									"description": "Required. YYYY-MM-DD"
+								},
+								{
+									"key": "check_out_date",
+									"value": "{{check_out_date}}",
+									"description": "Required. Must be after check_in_date"
+								},
+								{
+									"key": "room_type_id",
+									"value": "1",
+									"description": "Optional filter",
+									"disabled": true
+								},
+								{
+									"key": "guests_count",
+									"value": "2",
+									"description": "Optional, default 1"
+								}
+							]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const json = pm.response.json();",
+									"if (json.data && json.data.length > 0) {",
+									"    pm.collectionVariables.set('room_id', json.data[0].id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "List reservations",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": "{{base_url}}/reservations"
+					}
+				},
+				{
+					"name": "Create reservation",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"room_id\": {{room_id}},\n  \"guest_id\": {{guest_id}},\n  \"check_in_date\": \"{{check_in_date}}\",\n  \"check_out_date\": \"{{check_out_date}}\",\n  \"guests_count\": 2,\n  \"special_requests\": \"High floor preferred\"\n}"
+						},
+						"url": "{{base_url}}/reservations"
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    const json = pm.response.json();",
+									"    if (json.data && json.data.id) {",
+									"        pm.collectionVariables.set('reservation_id', json.data.id);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "Get reservation",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": "{{base_url}}/reservations/{{reservation_id}}"
+					}
+				},
+				{
+					"name": "Cancel reservation",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": "{{base_url}}/reservations/{{reservation_id}}/cancel"
+					}
+				}
+			]
+		},
+		{
+			"name": "Stays",
+			"item": [
+				{
+					"name": "List stays",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": "{{base_url}}/stays"
+					}
+				},
+				{
+					"name": "Get stay",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": "{{base_url}}/stays/{{stay_id}}"
+					}
+				},
+				{
+					"name": "Check in (from reservation)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": "{{base_url}}/reservations/{{reservation_id}}/check-in",
+						"description": "Creates a stay and draft invoice. Room status becomes occupied."
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    const json = pm.response.json();",
+									"    if (json.data) {",
+									"        pm.collectionVariables.set('stay_id', json.data.id);",
+									"        if (json.data.invoice && json.data.invoice.id) {",
+									"            pm.collectionVariables.set('invoice_id', json.data.invoice.id);",
+									"        }",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "Check out",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": "{{base_url}}/stays/{{stay_id}}/check-out",
+						"description": "Completes stay, issues invoice if draft, frees room."
+					}
+				}
+			]
+		},
+		{
+			"name": "Billing",
+			"item": [
+				{
+					"name": "Get invoice",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": "{{base_url}}/invoices/{{invoice_id}}"
+					}
+				},
+				{
+					"name": "Add service charge",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"description\": \"Spa treatment\",\n  \"unit_price\": 75.00,\n  \"quantity\": 1,\n  \"type\": \"service\"\n}"
+						},
+						"url": "{{base_url}}/invoices/{{invoice_id}}/services"
+					}
+				},
+				{
+					"name": "Issue invoice",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": "{{base_url}}/invoices/{{invoice_id}}/issue",
+						"description": "Manually issue a draft invoice (checkout also issues automatically)."
+					}
+				},
+				{
+					"name": "Record payment",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"amount\": 100.00,\n  \"method\": \"card\",\n  \"transaction_reference\": \"TXN-12345\"\n}"
+						},
+						"url": "{{base_url}}/invoices/{{invoice_id}}/payments",
+						"description": "Payment methods: cash, card, bank_transfer, other"
+					}
+				}
+			]
+		}
+	]
+}
