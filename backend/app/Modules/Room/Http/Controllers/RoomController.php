@@ -8,7 +8,6 @@ use App\Modules\Room\Http\Resources\RoomResource;
 use App\Modules\Room\Http\Resources\RoomTypeResource;
 use App\Modules\Room\Services\RoomService;
 use App\Modules\Shared\Enums\RoomStatus;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
@@ -24,7 +23,10 @@ class RoomController extends Controller
             ? RoomStatus::from($request->query('status'))
             : null;
 
-        return RoomResource::collection($this->roomService->listRooms($status));
+        $perPage = (int) $request->integer('per_page', 10);
+        $perPage = max(1, min(100, $perPage));
+
+        return RoomResource::collection($this->roomService->paginateRooms($perPage, $status));
     }
 
     public function roomTypes(): AnonymousResourceCollection

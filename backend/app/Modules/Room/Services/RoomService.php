@@ -6,6 +6,7 @@ use App\Modules\Room\Models\Room;
 use App\Modules\Room\Models\RoomType;
 use App\Modules\Room\Repositories\Contracts\RoomRepositoryInterface;
 use App\Modules\Shared\Enums\RoomStatus;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 
 class RoomService
@@ -15,15 +16,16 @@ class RoomService
     ) {}
 
     /**
-     * @return Collection<int, Room>
+     * @return LengthAwarePaginator<Room>
      */
-    public function listRooms(?RoomStatus $status = null): Collection
+    public function paginateRooms(int $perPage = 10, ?RoomStatus $status = null): LengthAwarePaginator
     {
         return Room::query()
             ->with('roomType')
             ->when($status, fn ($q) => $q->where('status', $status))
             ->orderBy('number')
-            ->get();
+            ->paginate($perPage)
+            ->withQueryString();
     }
 
     /**

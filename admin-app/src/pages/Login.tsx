@@ -1,10 +1,13 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { isAxiosError } from 'axios';
 import api from '../lib/axios';
+import useAuth from '../auth/useAuth';
 
 export default function Login() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { refresh } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -21,9 +24,13 @@ export default function Login() {
       
       // 2. Attempt Login
       await api.post('/api/v1/login', { email, password });
+
+      // 3. Hydrate user session
+      await refresh();
       
-      // 3. Navigate to Dashboard
-      navigate('/dashboard');
+      // 4. Navigate
+      const from = (location.state as { from?: string } | null)?.from;
+      navigate(from || '/dashboard', { replace: true });
     } catch (err: unknown) {
       if (isAxiosError(err)) {
         const status = err.response?.status;
