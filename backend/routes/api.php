@@ -15,6 +15,14 @@ Route::prefix('v1')->group(function () {
     // Public Newsletter Subscribe
     Route::post('newsletter/subscribe', [NewsletterSubscriberController::class, 'store']);
 
+    // Public guest routes
+    Route::prefix('public')->group(function () {
+        Route::get('room-types', [RoomController::class, 'roomTypes']);
+        Route::get('availability', [ReservationController::class, 'searchAvailability']);
+        Route::post('reservations', [ReservationController::class, 'storePublic']);
+        Route::post('support/contact', [SupportController::class, 'createConversation']);
+    });
+
     // Auth Routes
     Route::post('login', [AuthController::class, 'login']);
     Route::post('logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');

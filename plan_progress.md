@@ -8,7 +8,7 @@ This file tracks what is implemented, what is partially done, and what is pendin
 
 - `backend/` – Laravel 13 REST API + Sanctum SPA auth + HMS domain modules
 - `admin-app/` – React + TS + Vite admin dashboard (SPA)
-- `fronend-app/` – placeholder folder for user-facing frontend (not implemented yet)
+- `frontend-app/` – User-facing guest Next.js application (SPA/SSG)
 
 ## Core decisions (current)
 
@@ -26,6 +26,11 @@ This file tracks what is implemented, what is partially done, and what is pendin
 - Domain APIs (v1):
   - Rooms, Guests, Reservations, Stays, Billing (existing modules)
   - Rooms pagination (`per_page`, `page`) added
+  - Public guest-facing endpoints:
+    - `GET /api/v1/public/room-types` (all room types)
+    - `GET /api/v1/public/availability` (search available rooms)
+    - `POST /api/v1/public/reservations` (create guest booking)
+    - `POST /api/v1/public/support/contact` (submit help tickets)
 - Auth endpoints:
   - `POST /api/v1/login`
   - `POST /api/v1/logout` (auth:sanctum)
@@ -79,13 +84,27 @@ This file tracks what is implemented, what is partially done, and what is pendin
 - Notifications are UI-only placeholder (no backend integration).
 - Support reply sends to DB only (no actual email sending yet).
 
-### Pending (next recommended order)
+## Frontend-app (guest) status
+
+### Implemented
+
+- Type-safe backend client (`src/lib/api.ts`) connecting to Laravel public endpoints.
+- High-fidelity visual layout:
+  - Sticky glassmorphic Navbar and Footer.
+  - Interactive newsletter subscription form with toast feedback.
+  - Outfit / Geist typography and gradient accents.
+- Pages:
+  - Homepage (`src/app/page.tsx`): Hero section, characteristics grid, signature room type cards, and guest testimonials.
+  - Rooms listing (`src/app/rooms/page.tsx`): Dynamically fetched room types with details, pricing, capacity, and check-in links.
+  - Multi-step booking (`src/app/booking/page.tsx`): Availability date check, room selection card, guest information checkout form, booking summary invoice sidebar, and confirmation code screen.
+  - Contact page (`src/app/contact/page.tsx`): Ticket submission form linked to support database.
+
+## Pending (next recommended order)
 
 1. User management (admin): CRUD users + assign role (`admin/manager/assistant_manager/help_desk`).
 2. Apply RBAC to remaining modules (rooms, guests, reservations, billing).
 3. Support: real email send + inbound capture.
 4. Newsletter campaigns.
-5. User-facing frontend app in `fronend-app/`.
 
 ## How to run (local dev)
 

@@ -16,6 +16,7 @@ use App\Modules\Room\Http\Resources\RoomResource;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use App\Modules\Guest\Models\Guest;
 
 class ReservationController extends Controller
 {
@@ -59,6 +60,33 @@ class ReservationController extends Controller
             new CreateReservationData(
                 roomId: $request->integer('room_id'),
                 guestId: $request->integer('guest_id'),
+                checkInDate: Carbon::parse($request->validated('check_in_date')),
+                checkOutDate: Carbon::parse($request->validated('check_out_date')),
+                guestsCount: $request->integer('guests_count', 1),
+                specialRequests: $request->validated('special_requests'),
+            )
+        );
+
+        return (new ReservationResource($reservation))
+            ->response()
+            ->setStatusCode(201);
+    }
+
+    public function storePublic(StorePublicReservationRequest $request): JsonResponse
+    {
+        $guest = Guest::firstOrCreate(
+            ['email' => strtolower($request->validated('email'))],
+            [
+                'first_name' => $request->validated('first_name'),
+                'last_name' => $request->validated('last_name'),
+                'phone' => $request->validated('phone'),
+            ]
+        );
+
+        $reservation = $this->reservationService->createReservation(
+            new CreateReservationData(
+                roomId: $request->integer('room_id'),
+                guestId: $guest->id,
                 checkInDate: Carbon::parse($request->validated('check_in_date')),
                 checkOutDate: Carbon::parse($request->validated('check_out_date')),
                 guestsCount: $request->integer('guests_count', 1),
