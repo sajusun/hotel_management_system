@@ -8,8 +8,10 @@ use App\Modules\Room\Models\Room;
 use App\Modules\Room\Models\RoomType;
 use App\Modules\Shared\Enums\ReservationStatus;
 use App\Modules\Shared\Enums\RoomStatus;
+use App\Models\User;
 use App\Modules\Shared\Enums\StayStatus;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
 class StayAndBillingTest extends TestCase
@@ -21,6 +23,8 @@ class StayAndBillingTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+
+        Sanctum::actingAs(User::factory()->create());
 
         $type = RoomType::query()->create([
             'name' => 'Deluxe',

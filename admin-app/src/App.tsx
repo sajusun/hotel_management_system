@@ -3,6 +3,9 @@ import Login from './pages/Login';
 import DashboardLayout from './layouts/DashboardLayout';
 import Dashboard from './pages/Dashboard';
 import RoomsPage from './pages/rooms/RoomsPage';
+import GuestsPage from './pages/guests/GuestsPage';
+import ReservationsPage from './pages/reservations/ReservationsPage';
+import BillingPage from './pages/billing/BillingPage';
 import SiteSettingsPage from './pages/settings/SiteSettingsPage';
 import SubscribersPage from './pages/newsletter/SubscribersPage';
 import SupportInboxPage from './pages/support/SupportInboxPage';
@@ -29,9 +32,9 @@ function App() {
           >
             <Route index element={<Dashboard />} />
             <Route path="rooms" element={<RoomsPage />} />
-            <Route path="reservations" element={<div className="p-4 text-slate-500">Reservations Module Coming Soon</div>} />
-            <Route path="guests" element={<div className="p-4 text-slate-500">Guests Module Coming Soon</div>} />
-            <Route path="billing" element={<div className="p-4 text-slate-500">Billing Module Coming Soon</div>} />
+            <Route path="reservations" element={<ReservationsPage />} />
+            <Route path="guests" element={<GuestsPage />} />
+            <Route path="billing" element={<BillingPage />} />
             <Route
               path="newsletter/subscribers"
               element={

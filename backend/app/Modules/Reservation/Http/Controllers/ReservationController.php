@@ -7,6 +7,7 @@ use App\Modules\Reservation\DTOs\AvailabilitySearchData;
 use App\Modules\Reservation\DTOs\CreateReservationData;
 use App\Modules\Reservation\Http\Requests\SearchAvailabilityRequest;
 use App\Modules\Reservation\Http\Requests\StoreReservationRequest;
+use App\Modules\Reservation\Http\Requests\StorePublicReservationRequest;
 use App\Modules\Reservation\Http\Resources\ReservationResource;
 use App\Modules\Reservation\Models\Reservation;
 use App\Modules\Reservation\Repositories\Contracts\ReservationRepositoryInterface;

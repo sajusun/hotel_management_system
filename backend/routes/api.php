@@ -40,25 +40,28 @@ Route::prefix('v1')->group(function () {
     Route::post('support/conversations/{conversation}/reply', [SupportController::class, 'reply'])
         ->middleware(['auth:sanctum', 'role:admin,help_desk']);
 
-    Route::get('room-types', [RoomController::class, 'roomTypes']);
-    Route::get('rooms', [RoomController::class, 'index']);
-    Route::patch('rooms/{room}/status', [RoomController::class, 'updateStatus']);
+    Route::middleware('auth:sanctum')->group(function () {
+        Route::get('room-types', [RoomController::class, 'roomTypes']);
+        Route::get('rooms', [RoomController::class, 'index']);
+        Route::patch('rooms/{room}/status', [RoomController::class, 'updateStatus']);
 
-    Route::apiResource('guests', GuestController::class);
+        Route::apiResource('guests', GuestController::class);
 
-    Route::get('reservations', [ReservationController::class, 'index']);
-    Route::get('reservations/{reservation}', [ReservationController::class, 'show']);
-    Route::post('reservations', [ReservationController::class, 'store']);
-    Route::post('reservations/{reservation}/cancel', [ReservationController::class, 'cancel']);
-    Route::get('availability', [ReservationController::class, 'searchAvailability']);
+        Route::get('reservations', [ReservationController::class, 'index']);
+        Route::get('reservations/{reservation}', [ReservationController::class, 'show']);
+        Route::post('reservations', [ReservationController::class, 'store']);
+        Route::post('reservations/{reservation}/cancel', [ReservationController::class, 'cancel']);
+        Route::get('availability', [ReservationController::class, 'searchAvailability']);
 
-    Route::get('stays', [StayController::class, 'index']);
-    Route::get('stays/{stay}', [StayController::class, 'show']);
-    Route::post('reservations/{reservation}/check-in', [StayController::class, 'checkIn']);
-    Route::post('stays/{stay}/check-out', [StayController::class, 'checkOut']);
+        Route::get('stays', [StayController::class, 'index']);
+        Route::get('stays/{stay}', [StayController::class, 'show']);
+        Route::post('reservations/{reservation}/check-in', [StayController::class, 'checkIn']);
+        Route::post('stays/{stay}/check-out', [StayController::class, 'checkOut']);
 
-    Route::get('invoices/{invoice}', [InvoiceController::class, 'show']);
-    Route::post('invoices/{invoice}/services', [InvoiceController::class, 'addServiceCharge']);
-    Route::post('invoices/{invoice}/issue', [InvoiceController::class, 'issue']);
-    Route::post('invoices/{invoice}/payments', [InvoiceController::class, 'recordPayment']);
+        Route::get('invoices', [InvoiceController::class, 'index']);
+        Route::get('invoices/{invoice}', [InvoiceController::class, 'show']);
+        Route::post('invoices/{invoice}/services', [InvoiceController::class, 'addServiceCharge']);
+        Route::post('invoices/{invoice}/issue', [InvoiceController::class, 'issue']);
+        Route::post('invoices/{invoice}/payments', [InvoiceController::class, 'recordPayment']);
+    });
 });
