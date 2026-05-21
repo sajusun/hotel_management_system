@@ -17,6 +17,9 @@ use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use App\Modules\Guest\Models\Guest;
+use App\Models\User;
+use App\Notifications\NewReservation;
+use Illuminate\Support\Facades\Notification;
 
 class ReservationController extends Controller
 {
@@ -67,6 +70,9 @@ class ReservationController extends Controller
             )
         );
 
+        $admins = User::whereIn('role', ['admin', 'help_desk', 'receptionist', 'manager'])->get();
+        Notification::send($admins, new NewReservation($reservation));
+
         return (new ReservationResource($reservation))
             ->response()
             ->setStatusCode(201);
@@ -93,6 +99,9 @@ class ReservationController extends Controller
                 specialRequests: $request->validated('special_requests'),
             )
         );
+
+        $admins = User::whereIn('role', ['admin', 'help_desk', 'receptionist', 'manager'])->get();
+        Notification::send($admins, new NewReservation($reservation));
 
         return (new ReservationResource($reservation))
             ->response()

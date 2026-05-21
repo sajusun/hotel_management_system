@@ -18,6 +18,17 @@ import {
   User,
 } from 'lucide-react';
 import useAuth from '../auth/useAuth';
+import api from '../lib/axios';
+
+interface NotificationItem {
+  id: string;
+  type: 'support' | 'reservation' | 'newsletter' | 'general';
+  target_id: string | null;
+  title: string;
+  message: string;
+  read_at: string | null;
+  created_at: string;
+}
 
 export default function DashboardLayout() {
   const navigate = useNavigate();
@@ -34,6 +45,77 @@ export default function DashboardLayout() {
   const [profileOpen, setProfileOpen] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(Boolean(document.fullscreenElement));
   const profileRef = useRef<HTMLDivElement | null>(null);
+
+  const [notifications, setNotifications] = useState<NotificationItem[]>([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const notificationsRef = useRef<HTMLDivElement | null>(null);
+
+  const fetchNotifications = async () => {
+    try {
+      const res = await api.get('/api/v1/notifications');
+      setNotifications(res.data.data);
+      setUnreadCount(res.data.unread_count);
+    } catch (err) {
+      console.error('Failed to fetch notifications:', err);
+    }
+  };
+
+  useEffect(() => {
+    if (!user) return;
+
+    fetchNotifications();
+
+    const interval = setInterval(fetchNotifications, 30000);
+    return () => clearInterval(interval);
+  }, [user]);
+
+  useEffect(() => {
+    const onClick = (e: MouseEvent) => {
+      if (!notificationsRef.current) return;
+      if (notificationsRef.current.contains(e.target as Node)) return;
+      setNotificationsOpen(false);
+    };
+    if (!notificationsOpen) return;
+    window.addEventListener('click', onClick);
+    return () => window.removeEventListener('click', onClick);
+  }, [notificationsOpen]);
+
+  const handleNotificationClick = async (n: NotificationItem) => {
+    setNotificationsOpen(false);
+
+    if (!n.read_at) {
+      try {
+        await api.post(`/api/v1/notifications/${n.id}/read`);
+        setNotifications((prev) =>
+          prev.map((item) => (item.id === n.id ? { ...item, read_at: new Date().toISOString() } : item))
+        );
+        setUnreadCount((prev) => Math.max(0, prev - 1));
+      } catch (err) {
+        console.error('Failed to mark notification as read:', err);
+      }
+    }
+
+    if (n.type === 'support' && n.target_id) {
+      navigate(`/dashboard/support/${n.target_id}`);
+    } else if (n.type === 'reservation') {
+      navigate('/dashboard/reservations');
+    } else if (n.type === 'newsletter') {
+      navigate('/dashboard/newsletter/subscribers');
+    }
+  };
+
+  const handleMarkAllAsRead = async () => {
+    try {
+      await api.post('/api/v1/notifications/read-all');
+      setNotifications((prev) =>
+        prev.map((item) => ({ ...item, read_at: new Date().toISOString() }))
+      );
+      setUnreadCount(0);
+    } catch (err) {
+      console.error('Failed to mark all notifications as read:', err);
+    }
+  };
 
   const navItems = useMemo(
     () => [
@@ -158,15 +240,108 @@ export default function DashboardLayout() {
             {isFullscreen ? <Minimize2 className="w-5 h-5" /> : <Maximize2 className="w-5 h-5" />}
           </button>
 
-          <button
-            type="button"
-            className="p-2 rounded-lg hover:bg-slate-50 text-slate-700 relative"
-            aria-label="Notifications"
-            title="Notifications"
-          >
-            <Bell className="w-5 h-5" />
-            <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-indigo-500" />
-          </button>
+          <div className="relative" ref={notificationsRef}>
+            <button
+              type="button"
+              onClick={() => setNotificationsOpen((v) => !v)}
+              className="p-2 rounded-lg hover:bg-slate-50 text-slate-700 relative"
+              aria-label="Notifications"
+              title="Notifications"
+            >
+              <Bell className="w-5 h-5" />
+              {unreadCount > 0 && (
+                <span className="absolute top-1.5 right-1.5 flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span>
+                </span>
+              )}
+            </button>
+
+            {notificationsOpen && (
+              <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-white border border-slate-200 rounded-xl shadow-lg overflow-hidden z-50">
+                <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between">
+                  <div>
+                    <div className="text-sm font-semibold text-slate-900">Notifications</div>
+                    <div className="text-xs text-slate-500 mt-0.5">
+                      {unreadCount} unread notification{unreadCount !== 1 ? 's' : ''}
+                    </div>
+                  </div>
+                  {unreadCount > 0 && (
+                    <button
+                      type="button"
+                      onClick={handleMarkAllAsRead}
+                      className="text-xs text-indigo-600 hover:text-indigo-800 font-medium"
+                    >
+                      Mark all as read
+                    </button>
+                  )}
+                </div>
+
+                <div className="max-h-96 overflow-y-auto divide-y divide-slate-100">
+                  {notifications.length > 0 ? (
+                    notifications.map((n) => (
+                      <button
+                        key={n.id}
+                        type="button"
+                        onClick={() => handleNotificationClick(n)}
+                        className={[
+                          'w-full text-left px-4 py-3 hover:bg-slate-50 transition-colors flex gap-3 items-start',
+                          !n.read_at ? 'bg-indigo-50/20' : '',
+                        ].join(' ')}
+                      >
+                        <div className="mt-0.5">
+                          {n.type === 'support' && (
+                            <div className="p-1.5 rounded-lg bg-emerald-100 text-emerald-600">
+                              <Users className="w-4 h-4" />
+                            </div>
+                          )}
+                          {n.type === 'reservation' && (
+                            <div className="p-1.5 rounded-lg bg-blue-100 text-blue-600">
+                              <CalendarDays className="w-4 h-4" />
+                            </div>
+                          )}
+                          {n.type === 'newsletter' && (
+                            <div className="p-1.5 rounded-lg bg-purple-100 text-purple-600">
+                              <Bell className="w-4 h-4" />
+                            </div>
+                          )}
+                          {n.type !== 'support' && n.type !== 'reservation' && n.type !== 'newsletter' && (
+                            <div className="p-1.5 rounded-lg bg-slate-100 text-slate-600">
+                              <Bell className="w-4 h-4" />
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between gap-2">
+                            <span className={['text-xs font-semibold', !n.read_at ? 'text-slate-900' : 'text-slate-600'].join(' ')}>
+                              {n.title}
+                            </span>
+                            <span className="text-[10px] text-slate-400 whitespace-nowrap">
+                              {formatRelativeTime(n.created_at)}
+                            </span>
+                          </div>
+                          <p className={['text-xs mt-0.5 line-clamp-2', !n.read_at ? 'text-slate-700 font-medium' : 'text-slate-500'].join(' ')}>
+                            {n.message}
+                          </p>
+                        </div>
+                        {!n.read_at && (
+                          <div className="w-2 h-2 rounded-full bg-indigo-500 mt-2 flex-shrink-0" />
+                        )}
+                      </button>
+                    ))
+                  ) : (
+                    <div className="py-8 px-4 text-center">
+                      <div className="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center text-slate-400 mx-auto mb-3">
+                        <Bell className="w-6 h-6" />
+                      </div>
+                      <p className="text-sm font-medium text-slate-900">All caught up!</p>
+                      <p className="text-xs text-slate-500 mt-0.5">No notifications at the moment.</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
 
           <div className="relative" ref={profileRef}>
             <button
@@ -314,4 +489,19 @@ export default function DashboardLayout() {
       </div>
     </div>
   );
+}
+
+function formatRelativeTime(dateString: string) {
+  const date = new Date(dateString);
+  const now = new Date();
+  const seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+  if (seconds < 5) return 'just now';
+  if (seconds < 60) return `${seconds}s ago`;
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  if (days < 30) return `${days}d ago`;
+  return date.toLocaleDateString();
 }

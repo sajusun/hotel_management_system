@@ -9,6 +9,7 @@ use App\Modules\Auth\Http\Controllers\AuthController;
 use App\Http\Controllers\Api\SettingsController;
 use App\Http\Controllers\Api\NewsletterSubscriberController;
 use App\Http\Controllers\Api\SupportController;
+use App\Http\Controllers\Api\NotificationsController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
@@ -49,6 +50,10 @@ Route::prefix('v1')->group(function () {
         ->middleware(['auth:sanctum', 'role:admin,help_desk']);
 
     Route::middleware('auth:sanctum')->group(function () {
+        Route::get('notifications', [NotificationsController::class, 'index']);
+        Route::post('notifications/{id}/read', [NotificationsController::class, 'markAsRead']);
+        Route::post('notifications/read-all', [NotificationsController::class, 'markAllAsRead']);
+
         Route::get('room-types', [RoomController::class, 'roomTypes']);
         Route::get('rooms', [RoomController::class, 'index']);
         Route::patch('rooms/{room}/status', [RoomController::class, 'updateStatus']);

@@ -47,10 +47,12 @@ This file tracks what is implemented, what is partially done, and what is pendin
   - `GET /api/v1/newsletter/subscribers` (admin/help_desk)
 - Support:
   - Conversations list/show, status update, reply logging, manual create (admin/help_desk)
+  - Database notifications system with dedicated migration and custom triggers for reservations, support tickets, and newsletter subscribers.
+  - Notifications API (`GET /api/v1/notifications`, `POST /api/v1/notifications/{id}/read`, and `POST /api/v1/notifications/read-all`).
+  - Support reply email sending with dynamic site settings envelope configuration and responsive HTML blade template.
 
 ### Partially implemented
 
-- Support “reply” currently logs to DB (`provider=manual`) but does not actually send emails.
 - Newsletter only stores subscribers; no campaign sender or delivery tracking yet.
 
 ### Pending
@@ -58,7 +60,6 @@ This file tracks what is implemented, what is partially done, and what is pendin
 - Full RBAC matrix across all domain routes (currently only Settings/Newsletter/Support are role-protected).
 - User management (create users, set role, deactivate, etc.).
 - Email provider integration:
-  - outbound sending for support replies
   - inbound webhook/IMAP ingestion to attach replies to conversations
 - Newsletter campaigns (compose/send, opt-out, unsubscribe).
 
@@ -78,11 +79,11 @@ This file tracks what is implemented, what is partially done, and what is pendin
   - Settings: site settings full-page responsive form (admin only)
   - Newsletter: subscribers list (admin/help_desk)
   - Support: inbox list + thread view + reply/status UI (admin/help_desk)
+  - Notifications: stateful dropdown popover with 30s polling, unread badges, mark-as-read callbacks, and contextual navigation routing.
 
 ### Partially implemented
 
-- Notifications are UI-only placeholder (no backend integration).
-- Support reply sends to DB only (no actual email sending yet).
+- None.
 
 ## Frontend-app (guest) status
 

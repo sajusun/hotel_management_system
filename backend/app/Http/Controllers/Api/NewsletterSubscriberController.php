@@ -4,8 +4,11 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\NewsletterSubscriber;
+use App\Models\User;
+use App\Notifications\NewNewsletterSubscriber;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Notification;
 
 class NewsletterSubscriberController extends Controller
 {
@@ -40,6 +43,9 @@ class NewsletterSubscriberController extends Controller
         $subscriber = NewsletterSubscriber::query()->create([
             'email' => strtolower($validated['email']),
         ]);
+
+        $admins = User::whereIn('role', ['admin', 'help_desk'])->get();
+        Notification::send($admins, new NewNewsletterSubscriber($subscriber));
 
         return [
             'data' => [

@@ -5,7 +5,13 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\SupportConversation;
 use App\Models\SupportMessage;
+use App\Models\User;
+use App\Mail\SupportReplyMail;
+use App\Notifications\NewSupportTicket;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 
 class SupportController extends Controller
 {
@@ -93,6 +99,9 @@ class SupportController extends Controller
             'received_at' => now(),
         ]);
 
+        $admins = User::whereIn('role', ['admin', 'help_desk'])->get();
+        Notification::send($admins, new NewSupportTicket($conv));
+
         return [
             'data' => [
                 'id' => $conv->id,
@@ -120,12 +129,29 @@ class SupportController extends Controller
             'to_email' => $to,
             'subject' => $validated['subject'] ?? $conv->subject,
             'body' => $validated['message'],
-            // NOTE: actual email sending/provider webhooks will be added later.
             'provider' => 'manual',
             'sent_at' => now(),
         ]);
 
         $conv->update(['last_message_at' => now()]);
+
+        $siteSettings = \App\Models\Setting::query()->where('key', 'site')->first()?->value ?? [];
+        $fromEmail = $siteSettings['support_email'] ?? config('mail.from.address');
+        $fromName = $siteSettings['name'] ?? config('mail.from.name');
+
+        try {
+            Mail::to($to)->send(
+                (new SupportReplyMail($conv, $msg))
+                    ->from($fromEmail, $fromName)
+            );
+            $msg->update([
+                'provider' => config('mail.default') ?: 'smtp',
+            ]);
+        } catch (\Throwable $e) {
+            Log::error("Failed to send support reply email for conversation {$conv->id}: " . $e->getMessage(), [
+                'exception' => $e
+            ]);
+        }
 
         return [
             'data' => [
