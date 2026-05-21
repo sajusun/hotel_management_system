@@ -1,7 +1,7 @@
 import axios from "axios";
 
 // Determine base URL dynamically (allow fallback to port 8000)
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://backend_hms.test/api/v1";
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
