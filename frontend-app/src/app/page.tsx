@@ -49,35 +49,67 @@ export default function HomePage() {
   return (
     <div className="flex flex-col min-h-screen">
       {/* Hero Section */}
-      <section className="relative flex items-center justify-center min-h-[85vh] bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-zinc-900 via-zinc-950 to-black text-white px-4 sm:px-6 lg:px-8 overflow-hidden">
-        {/* Decorative subtle ambient lights */}
-        <div className="absolute top-1/4 left-1/4 h-96 w-96 rounded-full bg-violet-600/10 blur-3xl" />
-        <div className="absolute bottom-1/4 right-1/4 h-96 w-96 rounded-full bg-indigo-600/10 blur-3xl" />
+      <section className="relative flex items-center justify-center min-h-[92vh] bg-[url('/hero.png')] bg-cover bg-center text-white px-4 sm:px-6 lg:px-8 overflow-hidden">
+        {/* Advanced Multi-layer Gradient Overlay for maximum focus and readability */}
+        <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/50 to-black/60 z-0" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_transparent_30%,_rgba(9,9,11,0.65)_90%)] z-0" />
 
-        <div className="relative max-w-5xl mx-auto text-center space-y-8 z-10">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-indigo-500/10 px-3 py-1 text-xs font-medium text-indigo-400 border border-indigo-500/20 uppercase tracking-widest">
+        {/* Decorative ambient sunset light flares */}
+        <div className="absolute top-1/3 left-1/4 h-80 w-80 rounded-full bg-amber-500/10 blur-3xl z-0" />
+        <div className="absolute bottom-1/3 right-1/4 h-80 w-80 rounded-full bg-violet-600/10 blur-3xl z-0" />
+
+        <div className="relative max-w-5xl mx-auto text-center space-y-8 z-10 py-16 md:py-24">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/10 px-4 py-1.5 text-xs font-semibold text-amber-300 border border-amber-500/20 uppercase tracking-widest backdrop-blur-md">
+            <span className="h-2 w-2 rounded-full bg-amber-400 animate-pulse" />
             Welcome to Paradise
           </span>
-          <h1 className="text-4xl sm:text-6xl font-bold tracking-tight bg-gradient-to-b from-white via-zinc-100 to-zinc-400 bg-clip-text text-transparent">
-            A Haven of Exquisite Luxury and Peace
+          
+          <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight leading-[1.15] max-w-4xl mx-auto">
+            A Haven of <span className="bg-gradient-to-r from-amber-200 via-amber-100 to-orange-200 bg-clip-text text-transparent">Exquisite Luxury</span> and Peace
           </h1>
-          <p className="max-w-2xl mx-auto text-base sm:text-lg text-zinc-400 leading-relaxed">
+          
+          <p className="max-w-2xl mx-auto text-base sm:text-lg lg:text-xl text-zinc-200/90 leading-relaxed font-normal">
             Escape to Grand Horizon. Immerse yourself in premium seaside suites, Michelin-star dining, and bespoke service designed around your every desire.
           </p>
+          
           <div className="flex flex-col sm:flex-row justify-center items-center gap-4 pt-4">
             <Link
               href="/booking"
-              className="w-full sm:w-auto inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 px-6 py-3.5 text-base font-semibold text-white shadow-lg shadow-indigo-600/20 hover:shadow-indigo-600/35 hover:opacity-95 transition-all duration-300 hover:-translate-y-0.5"
+              className="w-full sm:w-auto inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 px-8 py-4 text-base font-bold text-zinc-950 shadow-lg shadow-amber-500/20 hover:shadow-amber-500/35 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300"
             >
               Reserve Your Stay
-              <ArrowRight className="ml-2.5 h-5 w-5" />
+              <ArrowRight className="ml-2.5 h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
             </Link>
             <Link
               href="/rooms"
-              className="w-full sm:w-auto inline-flex items-center justify-center rounded-xl border border-zinc-700/80 bg-zinc-900/40 px-6 py-3.5 text-base font-semibold text-zinc-200 backdrop-blur-sm hover:bg-zinc-900/80 hover:text-white transition-all duration-300"
+              className="w-full sm:w-auto inline-flex items-center justify-center rounded-xl border border-white/20 bg-white/10 px-8 py-4 text-base font-bold text-white backdrop-blur-md hover:bg-white/20 hover:border-white/30 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300"
             >
               Explore Our Rooms
             </Link>
+          </div>
+        </div>
+
+        {/* Floating Quick Stats/Characteristics Strip */}
+        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-zinc-950 to-transparent pt-16 pb-8 z-10 hidden sm:block">
+          <div className="max-w-5xl mx-auto px-4">
+            <div className="grid grid-cols-4 gap-6 text-center border-t border-white/10 pt-8 backdrop-blur-[1px]">
+              <div>
+                <p className="text-2xl lg:text-3xl font-extrabold text-amber-200">5-Star</p>
+                <p className="text-[10px] lg:text-xs text-zinc-400 uppercase tracking-widest mt-1">Luxury Rating</p>
+              </div>
+              <div>
+                <p className="text-2xl lg:text-3xl font-extrabold text-white">120+</p>
+                <p className="text-[10px] lg:text-xs text-zinc-400 uppercase tracking-widest mt-1">Seaside Suites</p>
+              </div>
+              <div>
+                <p className="text-2xl lg:text-3xl font-extrabold text-white">3</p>
+                <p className="text-[10px] lg:text-xs text-zinc-400 uppercase tracking-widest mt-1">Michelin Stars</p>
+              </div>
+              <div>
+                <p className="text-2xl lg:text-3xl font-extrabold text-white">24/7</p>
+                <p className="text-[10px] lg:text-xs text-zinc-400 uppercase tracking-widest mt-1">Bespoke Service</p>
+              </div>
+            </div>
           </div>
         </div>
       </section>
