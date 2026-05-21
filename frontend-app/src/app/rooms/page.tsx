@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { BedDouble, Users, Check, ArrowRight, Loader2, Info } from "lucide-react";
+import { BedDouble, Users, Check, ArrowRight, Loader2 } from "lucide-react";
 import { api, RoomType } from "@/lib/api";
 
 export default function RoomsPage() {
@@ -15,7 +15,7 @@ export default function RoomsPage() {
       try {
         const data = await api.getRoomTypes();
         setRoomTypes(data);
-      } catch (err: any) {
+      } catch (err) {
         console.error(err);
         setError("Failed to load room accommodations. Please try again later.");
       } finally {
@@ -26,7 +26,7 @@ export default function RoomsPage() {
   }, []);
 
   // Helper to parse amenities (stored as JSON array or comma separated string)
-  const parseAmenities = (amenitiesData: any): string[] => {
+  const parseAmenities = (amenitiesData: string[] | string | null | undefined): string[] => {
     if (!amenitiesData) return ["High-Speed Wi-Fi", "Smart TV", "Air Conditioning"];
     if (Array.isArray(amenitiesData)) return amenitiesData;
     if (typeof amenitiesData === "string") {

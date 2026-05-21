@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Hotel, Menu, X, Calendar, MessageSquare, BedDouble, Info } from "lucide-react";
+import { Hotel, Menu, X, Calendar, MessageSquare, BedDouble } from "lucide-react";
 import { useState } from "react";
 
 export default function Navbar() {

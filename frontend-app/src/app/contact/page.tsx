@@ -11,7 +11,6 @@ import {
   Loader2,
   CheckCircle,
   AlertCircle,
-  MessageSquare,
 } from "lucide-react";
 
 export default function ContactPage() {
@@ -43,11 +42,15 @@ export default function ContactPage() {
       setEmail("");
       setSubject("");
       setMessage("");
-    } catch (err: any) {
+    } catch (err) {
       console.error(err);
       setStatus("error");
+      const message =
+        err && typeof err === "object" && "response" in err
+          ? (err as { response?: { data?: { message?: string } } }).response?.data?.message
+          : null;
       setErrorMsg(
-        err.response?.data?.message || "Failed to submit ticket. Please try again."
+        message || "Failed to submit ticket. Please try again."
       );
     }
   };

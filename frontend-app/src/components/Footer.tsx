@@ -19,11 +19,15 @@ export default function Footer() {
       await api.subscribeNewsletter(email);
       setStatus("success");
       setEmail("");
-    } catch (err: any) {
+    } catch (err) {
       console.error(err);
       setStatus("error");
+      const message =
+        err && typeof err === "object" && "response" in err
+          ? (err as { response?: { data?: { message?: string } } }).response?.data?.message
+          : null;
       setErrorMessage(
-        err.response?.data?.message || "Failed to subscribe. Please try again."
+        message || "Failed to subscribe. Please try again."
       );
     }
   };

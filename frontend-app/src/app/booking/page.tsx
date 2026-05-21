@@ -14,8 +14,12 @@ import {
   Loader2,
   CalendarCheck2,
   AlertCircle,
-  Info,
 } from "lucide-react";
+
+interface ReservationResult {
+  reference?: string;
+  [key: string]: unknown;
+}
 
 function BookingContent() {
   const searchParams = useSearchParams();
@@ -29,8 +33,16 @@ function BookingContent() {
   const [availableRooms, setAvailableRooms] = useState<Room[]>([]);
 
   // Search parameters
-  const [checkIn, setCheckIn] = useState("");
-  const [checkOut, setCheckOut] = useState("");
+  const [checkIn, setCheckIn] = useState(() => {
+    const today = new Date();
+    return today.toISOString().split("T")[0];
+  });
+  const [checkOut, setCheckOut] = useState(() => {
+    const today = new Date();
+    const tomorrow = new Date(today);
+    tomorrow.setDate(today.getDate() + 1);
+    return tomorrow.toISOString().split("T")[0];
+  });
   const [selectedRoomType, setSelectedRoomType] = useState<string>("");
   const [guestsCount, setGuestsCount] = useState<number>(1);
 
@@ -51,7 +63,7 @@ function BookingContent() {
   const [submitError, setSubmitError] = useState("");
 
   // Success details
-  const [reservationResult, setReservationResult] = useState<any>(null);
+  const [reservationResult, setReservationResult] = useState<ReservationResult | null>(null);
 
   // Load room types and handle initial query parameters
   useEffect(() => {
@@ -70,14 +82,6 @@ function BookingContent() {
       }
     }
     loadRoomTypes();
-
-    // Default dates (today & tomorrow)
-    const today = new Date();
-    const tomorrow = new Date(today);
-    tomorrow.setDate(today.getDate() + 1);
-
-    setCheckIn(today.toISOString().split("T")[0]);
-    setCheckOut(tomorrow.toISOString().split("T")[0]);
   }, [searchParams]);
 
   // Step 1: Search availability
@@ -102,10 +106,14 @@ function BookingContent() {
 
       setAvailableRooms(rooms);
       setStep(2);
-    } catch (err: any) {
+    } catch (err) {
       console.error(err);
+      const message =
+        err && typeof err === "object" && "response" in err
+          ? (err as { response?: { data?: { message?: string } } }).response?.data?.message
+          : null;
       setSearchError(
-        err.response?.data?.message || "Failed to search availability. Please try again."
+        message || "Failed to search availability. Please try again."
       );
     } finally {
       setLoading(false);
@@ -141,10 +149,14 @@ function BookingContent() {
 
       setReservationResult(result);
       setStep(4);
-    } catch (err: any) {
+    } catch (err) {
       console.error(err);
+      const message =
+        err && typeof err === "object" && "response" in err
+          ? (err as { response?: { data?: { message?: string } } }).response?.data?.message
+          : null;
       setSubmitError(
-        err.response?.data?.message || "Failed to create reservation. Please verify details."
+        message || "Failed to create reservation. Please verify details."
       );
     } finally {
       setSubmitting(false);
