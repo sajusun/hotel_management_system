@@ -129,8 +129,15 @@ export default function SubscribersPage() {
             </div>
 
             <div className="px-5 py-4 border-t border-slate-200">
-              <Pagination page={data.meta.current_page} lastPage={data.meta.last_page} onPageChange={setPage} />
+              {data && data.meta && (
+                <Pagination
+                  page={data.meta.current_page}
+                  lastPage={data.meta.last_page}
+                  onPageChange={setPage}
+                />
+              )}
             </div>
+
           </div>
         ) : (
           <div className="p-6 text-sm text-slate-500">No subscribers yet.</div>
