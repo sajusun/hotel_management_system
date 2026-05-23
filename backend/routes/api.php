@@ -4,6 +4,7 @@ use App\Modules\Billing\Http\Controllers\InvoiceController;
 use App\Modules\Guest\Http\Controllers\GuestController;
 use App\Modules\Reservation\Http\Controllers\ReservationController;
 use App\Modules\Room\Http\Controllers\RoomController;
+use App\Modules\Room\Http\Controllers\RoomTypeController;
 use App\Modules\Stay\Http\Controllers\StayController;
 use App\Modules\Auth\Http\Controllers\AuthController;
 use App\Http\Controllers\Api\SettingsController;
@@ -54,9 +55,24 @@ Route::prefix('v1')->group(function () {
         Route::post('notifications/{id}/read', [NotificationsController::class, 'markAsRead']);
         Route::post('notifications/read-all', [NotificationsController::class, 'markAllAsRead']);
 
-        Route::get('room-types', [RoomController::class, 'roomTypes']);
+        // Rooms
         Route::get('rooms', [RoomController::class, 'index']);
         Route::patch('rooms/{room}/status', [RoomController::class, 'updateStatus']);
+        Route::middleware('role:admin,manager')->group(function () {
+            Route::post('rooms', [RoomController::class, 'store']);
+            Route::get('rooms/{room}', [RoomController::class, 'show']);
+            Route::put('rooms/{room}', [RoomController::class, 'update']);
+            Route::delete('rooms/{room}', [RoomController::class, 'destroy']);
+        });
+
+        // Room Types
+        Route::get('room-types', [RoomTypeController::class, 'index']);
+        Route::middleware('role:admin,manager')->group(function () {
+            Route::post('room-types', [RoomTypeController::class, 'store']);
+            Route::get('room-types/{room_type}', [RoomTypeController::class, 'show']);
+            Route::put('room-types/{room_type}', [RoomTypeController::class, 'update']);
+            Route::delete('room-types/{room_type}', [RoomTypeController::class, 'destroy']);
+        });
 
         Route::apiResource('guests', GuestController::class);
 

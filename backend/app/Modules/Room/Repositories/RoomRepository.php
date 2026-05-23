@@ -54,4 +54,23 @@ class RoomRepository implements RoomRepositoryInterface
             ->orderBy('number')
             ->get();
     }
+
+    public function create(array $attributes): Room
+    {
+        return Room::query()->create($attributes);
+    }
+
+    public function update(int $id, array $attributes): Room
+    {
+        $room = $this->findByIdOrFail($id);
+        $room->update($attributes);
+
+        return $room->fresh(['roomType']);
+    }
+
+    public function delete(int $id): bool
+    {
+        $room = $this->findByIdOrFail($id);
+        return $room->delete();
+    }
 }
