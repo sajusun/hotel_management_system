@@ -1,73 +1,73 @@
-# React + TypeScript + Vite
+# HMS Admin Application
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Project Purpose
+The Admin App is a React/TypeScript client used by hotel staff (receptionists, managers, housekeeping) to manage rooms, reservations, guests, billing, and reporting.
 
-Currently, two official plugins are available:
+## Tech Stack
+- **Framework:** React 18 with Vite
+- **Language:** TypeScript (tsx)
+- **Styling:** Tailwind CSS
+- **State Management:** Local component state + optional Zustand/Redux (to be introduced)
+- **HTTP Client:** Axios (wrapper in `src/api/axios.ts`)
+- **Routing:** React Router v6
+- **Form handling:** React Hook Form + Yup (future)
+- **Testing:** Jest + React Testing Library, Cypress for e2e
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
-
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## Getting Started
+```bash
+cd admin-app
+npm install          # install deps
+npm run dev          # start Vite dev server (http://localhost:5173)
+```
+Make sure the backend API is running (see backend README) and the `.env` file contains:
+```
+VITE_API_URL=http://localhost:8000/api/v1
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## Architecture Diagram
+```mermaid
+flowchart TD
+    A[React UI] --> B[Axios API Wrapper]
+    B --> C[Laravel Backend]
+    A --> D[React Router]
+    A --> E[State Store (Zustand/Redux)]
+    A --> F[Components]
+    F --> G[Pages]
+    F --> H[Shared UI]
+    G --> I[RoomsPage]
+    G --> J[ReservationsPage]
+    G --> K[Dashboard]
 ```
+
+## Folder Structure
+```
+src/
+ ├─ api/                # axios instance, interceptors
+ ├─ components/         # reusable UI components (Modal, FormField, Table)
+ │   ├─ Layout/         # Header, Sidebar, PageContainer
+ │   ├─ Rooms/          # RoomsPage, RoomFormModal
+ │   └─ Shared/         # Pagination, LoadingSpinner, Toasts
+ ├─ hooks/              # custom hooks (useRooms, useReservation)
+ ├─ pages/              # route‑level components
+ ├─ routes/             # route definitions, PrivateRoute
+ ├─ store/              # optional global state (Zustand/Redux)
+ └─ utils/              # helpers (formatters, constants)
+```
+
+## API Integration
+All API calls go through `src/api/axios.ts` which sets the base URL from `import.meta.env.VITE_API_URL` and includes the JWT token from HttpOnly cookie. Errors are normalized to `{message, code}` and shown via toast notifications.
+
+## Building for Production
+```bash
+npm run build   # creates `dist/` folder
+# Deploy the `dist/` folder on any static web server (NGINX, Vercel, Netlify)
+```
+
+## Contributing
+1. Branch from `main` (`git checkout -b feat/<name>`)
+2. Follow ESLint/Prettier formatting (`npm run lint`)
+3. Write unit tests for new components
+4. Submit a Pull Request
+
+---
+*Generated by Antigravity AI*
