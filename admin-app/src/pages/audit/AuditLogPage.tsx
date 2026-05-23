@@ -26,8 +26,8 @@ export default function AuditLogPage() {
     try {
       setLoading(true);
       const response = await getAuditLogs({ page, per_page: perPage, search });
-      setLogs(response.data);
-      setTotal(response.meta.total);
+      setLogs(response.data.data);
+      setTotal(response.data.total);
     } catch (error) {
       console.error(error);
       toast.error('Failed to load audit logs');
