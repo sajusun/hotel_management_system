@@ -8,6 +8,7 @@ use App\Modules\Room\Http\Controllers\RoomTypeController;
 use App\Modules\Stay\Http\Controllers\StayController;
 use App\Modules\Auth\Http\Controllers\AuthController;
 use App\Http\Controllers\Api\SettingsController;
+use App\Http\Controllers\Api\V1\AuditController;
 use App\Http\Controllers\Api\NewsletterSubscriberController;
 use App\Http\Controllers\Api\SupportController;
 use App\Http\Controllers\Api\NotificationsController;
@@ -35,20 +36,17 @@ Route::prefix('v1')->group(function () {
     Route::put('settings/site', [SettingsController::class, 'updateSite'])->middleware(['auth:sanctum', 'role:admin']);
 
     // Newsletter subscribers (admin + help desk)
-    Route::get('newsletter/subscribers', [NewsletterSubscriberController::class, 'index'])
-        ->middleware(['auth:sanctum', 'role:admin,help_desk']);
+    Route::get('newsletter/subscribers', [NewsletterSubscriberController::class, 'index'])->middleware(['auth:sanctum', 'role:admin,help_desk']);
+
+    // Audit logs (admin only)
+    Route::get('audit-logs', [AuditController::class, 'index'])->middleware(['auth:sanctum', 'role:admin']);
 
     // Support inbox (admin + help desk)
-    Route::get('support/conversations', [SupportController::class, 'index'])
-        ->middleware(['auth:sanctum', 'role:admin,help_desk']);
-    Route::post('support/conversations', [SupportController::class, 'createConversation'])
-        ->middleware(['auth:sanctum', 'role:admin,help_desk']);
-    Route::get('support/conversations/{conversation}', [SupportController::class, 'show'])
-        ->middleware(['auth:sanctum', 'role:admin,help_desk']);
-    Route::patch('support/conversations/{conversation}/status', [SupportController::class, 'updateStatus'])
-        ->middleware(['auth:sanctum', 'role:admin,help_desk']);
-    Route::post('support/conversations/{conversation}/reply', [SupportController::class, 'reply'])
-        ->middleware(['auth:sanctum', 'role:admin,help_desk']);
+    Route::get('support/conversations', [SupportController::class, 'index'])->middleware(['auth:sanctum', 'role:admin,help_desk']);
+    Route::post('support/conversations', [SupportController::class, 'createConversation'])->middleware(['auth:sanctum', 'role:admin,help_desk']);
+    Route::get('support/conversations/{conversation}', [SupportController::class, 'show'])->middleware(['auth:sanctum', 'role:admin,help_desk']);
+    Route::patch('support/conversations/{conversation}/status', [SupportController::class, 'updateStatus'])->middleware(['auth:sanctum', 'role:admin,help_desk']);
+    Route::post('support/conversations/{conversation}/reply', [SupportController::class, 'reply'])->middleware(['auth:sanctum', 'role:admin,help_desk']);
 
     Route::middleware('auth:sanctum')->group(function () {
         Route::get('notifications', [NotificationsController::class, 'index']);

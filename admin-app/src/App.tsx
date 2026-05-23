@@ -10,6 +10,8 @@ import SiteSettingsPage from './pages/settings/SiteSettingsPage';
 import SubscribersPage from './pages/newsletter/SubscribersPage';
 import SupportInboxPage from './pages/support/SupportInboxPage';
 import SupportThreadPage from './pages/support/SupportThreadPage';
+import UsersPage from './pages/users/UsersPage';
+import AuditLogPage from './pages/audit/AuditLogPage';
 import './App.css';
 import AuthProvider from './auth/AuthProvider';
 import ProtectedRoute from './auth/ProtectedRoute';
@@ -64,6 +66,23 @@ function App() {
               element={
                 <RequireRole roles={['admin']}>
                   <SiteSettingsPage />
+                </RequireRole>
+              }
+            />
+            {/* New admin features */}
+            <Route
+              path="users"
+              element={
+                <RequireRole roles={['admin']}>
+                  <UsersPage />
+                </RequireRole>
+              }
+            />
+            <Route
+              path="audit"
+              element={
+                <RequireRole roles={['admin']}>
+                  <AuditLogPage />
                 </RequireRole>
               }
             />

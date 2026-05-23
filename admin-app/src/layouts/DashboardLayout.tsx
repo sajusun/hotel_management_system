@@ -16,6 +16,7 @@ import {
   Maximize2,
   Minimize2,
   User,
+  FileText,
 } from 'lucide-react';
 import useAuth from '../auth/useAuth';
 import api from '../lib/axios';
@@ -127,6 +128,7 @@ export default function DashboardLayout() {
       { name: 'Subscribers', path: '/dashboard/newsletter/subscribers', icon: Bell },
       { name: 'Support', path: '/dashboard/support', icon: Users },
       { name: 'Settings', path: '/dashboard/settings', icon: Settings },
+      { name: 'Audit Logs', path: '/dashboard/audit', icon: FileText },
     ],
     [],
   );

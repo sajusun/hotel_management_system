@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
+import Skeleton from 'react-loading-skeleton';
 import api from '../../lib/axios';
 import Pagination from '../../components/Pagination';
 import type { LaravelPaginated } from '../../types/pagination';
@@ -160,8 +161,10 @@ export default function RoomsPage() {
         </div>
 
         {loading ? (
-          <div className="p-6 text-sm text-slate-500">Loading…</div>
-        ) : data?.data?.length ? (
+  <div className="p-6 text-sm text-slate-500">
+    <Skeleton height={20} count={5} />
+  </div>
+) : data?.data?.length ? (
           <div>
             <div className="hidden md:block">
               <table className="min-w-full text-sm">
