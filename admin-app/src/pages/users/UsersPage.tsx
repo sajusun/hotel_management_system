@@ -17,6 +17,7 @@ interface User {
   email: string;
   roles: Role[];
   created_at: string;
+  image?: string;
 }
 
 // ── Inline confirmation dialog ──────────────────────────────────────────────
@@ -75,9 +76,9 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({ open, userName, onConfirm
 
 // ── Role badge ───────────────────────────────────────────────────────────────
 const ROLE_COLORS: Record<string, string> = {
-  admin:     'bg-purple-100 text-purple-700',
-  manager:   'bg-blue-100 text-blue-700',
-  staff:     'bg-green-100 text-green-700',
+  admin: 'bg-purple-100 text-purple-700',
+  manager: 'bg-blue-100 text-blue-700',
+  staff: 'bg-green-100 text-green-700',
   help_desk: 'bg-amber-100 text-amber-700',
 };
 
@@ -92,18 +93,18 @@ const RoleBadge: React.FC<{ name: string }> = ({ name }) => {
 
 // ── Main page ────────────────────────────────────────────────────────────────
 const UsersPage: React.FC = () => {
-  const [users, setUsers]       = useState<User[]>([]);
-  const [roles, setRoles]       = useState<Role[]>([]);
-  const [loading, setLoading]   = useState(true);
+  const [users, setUsers] = useState<User[]>([]);
+  const [roles, setRoles] = useState<Role[]>([]);
+  const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [editUser, setEditUser] = useState<User | null>(null);
-  const [page, setPage]         = useState(1);
-  const [perPage, setPerPage]   = useState(10);
-  const [total, setTotal]       = useState(0);
+  const [page, setPage] = useState(1);
+  const [perPage, setPerPage] = useState(10);
+  const [total, setTotal] = useState(0);
 
   // Delete confirmation state
   const [deleteTarget, setDeleteTarget] = useState<User | null>(null);
-  const [deleting, setDeleting]         = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const fetchData = async () => {
     setLoading(true);
@@ -250,10 +251,13 @@ const UsersPage: React.FC = () => {
                 users.map((user) => (
                   <tr key={user.id} className="hover:bg-slate-50 transition-colors group">
                     <td className="px-4 py-3 font-medium text-slate-800">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center text-white text-xs font-bold shrink-0">
-                          {user.name.charAt(0).toUpperCase()}
-                        </div>
+                      <div className="flex items-center gap-1">
+
+                        <img
+                          src={user.image}
+                          alt={user.name.charAt(0).toUpperCase()}
+                          className="w-8 h-8 rounded-full object-cover shrink-0 border"
+                        />
                         {user.name}
                       </div>
                     </td>
