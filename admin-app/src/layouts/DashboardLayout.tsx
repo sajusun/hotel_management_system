@@ -8,6 +8,8 @@ import {
   Receipt,
   Settings,
   LogOut,
+  Shield,
+  Key,
   Menu,
   X,
   Bell,
@@ -127,8 +129,8 @@ export default function DashboardLayout() {
       { name: 'Billing', path: '/dashboard/billing', icon: Receipt },
       { name: 'Subscribers', path: '/dashboard/newsletter/subscribers', icon: Bell },
       { name: 'Support', path: '/dashboard/support', icon: Users },
-      { name: 'Settings', path: '/dashboard/settings', icon: Settings },
-      { name: 'Audit Logs', path: '/dashboard/audit', icon: FileText },
+      
+      { name: 'User Management', path: '/dashboard/users', icon: User },
     ],
     [],
   );

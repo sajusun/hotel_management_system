@@ -8,11 +8,13 @@ use App\Modules\Room\Http\Controllers\RoomTypeController;
 use App\Modules\Stay\Http\Controllers\StayController;
 use App\Modules\Auth\Http\Controllers\AuthController;
 use App\Http\Controllers\Api\SettingsController;
-use App\Http\Controllers\Api\V1\AuditController;
+// PermissionController and UserRoleController are handled by UserManagementController
 use App\Http\Controllers\Api\NewsletterSubscriberController;
 use App\Http\Controllers\Api\SupportController;
 use App\Http\Controllers\Api\NotificationsController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\V1\AuditController;
+use App\Http\Controllers\Api\V1\UserManagementController;
 
 Route::prefix('v1')->group(function () {
     // Public Newsletter Subscribe
@@ -29,7 +31,7 @@ Route::prefix('v1')->group(function () {
     // Auth Routes
     Route::post('api-login', [AuthController::class, 'apiLogin']);
     // Route::post('logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
-    // Route::get('user', [AuthController::class, 'user'])->middleware('auth:sanctum');
+        Route::get('user', [AuthController::class, 'user'])->middleware('auth:sanctum');
 
     // Settings (admin-only for now)
     Route::get('settings/site', [SettingsController::class, 'showSite'])->middleware(['auth:sanctum', 'role:admin']);
@@ -38,10 +40,19 @@ Route::prefix('v1')->group(function () {
     // Newsletter subscribers (admin + help desk)
     Route::get('newsletter/subscribers', [NewsletterSubscriberController::class, 'index'])->middleware(['auth:sanctum', 'role:admin,help_desk']);
 
-    // Audit logs (admin only)
-    Route::get('audit-logs', [AuditController::class, 'index'])->middleware(['auth:sanctum', 'role:admin']);
-
-    // Support inbox (admin + help desk)
+    // Role & Permission management (admin only)
+    Route::get('roles', [UserManagementController::class, 'getRoles'])->middleware(['auth:sanctum', 'role:admin']);
+    Route::get('permissions', [UserManagementController::class, 'getPermissions'])->middleware(['auth:sanctum', 'role:admin']);
+    Route::get('users', [UserManagementController::class, 'index'])->middleware(['auth:sanctum', 'role:admin']);
+    Route::put('users/{user}/permissions', [UserManagementController::class, 'updatePermissions'])->middleware(['auth:sanctum', 'role:admin']);
+    // Sync roles for a user (admin only)
+    Route::put('users/{user}/roles', [UserManagementController::class, 'updateRoles'])->middleware(['auth:sanctum', 'role:admin']);
+    // Full user update (name, email, roles)
+    Route::put('users/{user}', [UserManagementController::class, 'updateUser'])->middleware(['auth:sanctum', 'role:admin']);
+    // Delete user (admin only)
+    Route::delete('users/{user}', [UserManagementController::class, 'destroy'])->middleware(['auth:sanctum', 'role:admin']);
+    // Create a new user with roles (admin only)
+    Route::post('users', [UserManagementController::class, 'store'])->middleware(['auth:sanctum', 'role:admin']);
     Route::get('support/conversations', [SupportController::class, 'index'])->middleware(['auth:sanctum', 'role:admin,help_desk']);
     Route::post('support/conversations', [SupportController::class, 'createConversation'])->middleware(['auth:sanctum', 'role:admin,help_desk']);
     Route::get('support/conversations/{conversation}', [SupportController::class, 'show'])->middleware(['auth:sanctum', 'role:admin,help_desk']);
@@ -90,5 +101,6 @@ Route::prefix('v1')->group(function () {
         Route::post('invoices/{invoice}/services', [InvoiceController::class, 'addServiceCharge']);
         Route::post('invoices/{invoice}/issue', [InvoiceController::class, 'issue']);
         Route::post('invoices/{invoice}/payments', [InvoiceController::class, 'recordPayment']);
+        Route::get('audit-logs', [AuditController::class, 'index'])->middleware(['auth:sanctum', 'role:admin']);
     });
 });
