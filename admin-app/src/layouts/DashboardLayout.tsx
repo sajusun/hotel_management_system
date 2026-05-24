@@ -129,7 +129,7 @@ export default function DashboardLayout() {
       { name: 'Billing', path: '/dashboard/billing', icon: Receipt },
       { name: 'Subscribers', path: '/dashboard/newsletter/subscribers', icon: Bell },
       { name: 'Support', path: '/dashboard/support', icon: Users },
-      
+      { name: 'Audit logs', path: '/dashboard/audit', icon: Shield },
       { name: 'User Management', path: '/dashboard/users', icon: User },
     ],
     [],
@@ -443,10 +443,9 @@ export default function DashboardLayout() {
                 end={item.path === '/dashboard'}
                 onClick={() => setMobileOpen(false)}
                 className={({ isActive }) =>
-                  `flex items-center ${collapsed ? 'md:justify-center md:px-3' : 'px-4'} py-3 text-sm font-medium rounded-lg transition-colors ${
-                    isActive
-                      ? 'bg-slate-100 text-slate-900'
-                      : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                  `flex items-center ${collapsed ? 'md:justify-center md:px-3' : 'px-4'} py-3 text-sm font-medium rounded-lg transition-colors ${isActive
+                    ? 'bg-slate-100 text-slate-900'
+                    : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
                   }`
                 }
               >
