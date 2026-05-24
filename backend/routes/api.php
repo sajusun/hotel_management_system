@@ -1,20 +1,20 @@
 <?php
 
-use App\Modules\Billing\Http\Controllers\InvoiceController;
-use App\Modules\Guest\Http\Controllers\GuestController;
-use App\Modules\Reservation\Http\Controllers\ReservationController;
-use App\Modules\Room\Http\Controllers\RoomController;
-use App\Modules\Room\Http\Controllers\RoomTypeController;
-use App\Modules\Stay\Http\Controllers\StayController;
-use App\Modules\Auth\Http\Controllers\AuthController;
-use App\Http\Controllers\Api\SettingsController;
-// PermissionController and UserRoleController are handled by UserManagementController
-use App\Http\Controllers\Api\NewsletterSubscriberController;
-use App\Http\Controllers\Api\SupportController;
-use App\Http\Controllers\Api\NotificationsController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\SupportController;
+use App\Http\Controllers\Api\SettingsController;
 use App\Http\Controllers\Api\V1\AuditController;
+use App\Http\Controllers\Api\NotificationsController;
+use App\Modules\Auth\Http\Controllers\AuthController;
+use App\Modules\Room\Http\Controllers\RoomController;
+use App\Modules\Stay\Http\Controllers\StayController;
+// PermissionController and UserRoleController are handled by UserManagementController
+use App\Modules\Guest\Http\Controllers\GuestController;
 use App\Http\Controllers\Api\V1\UserManagementController;
+use App\Modules\Room\Http\Controllers\RoomTypeController;
+use App\Modules\Billing\Http\Controllers\InvoiceController;
+use App\Http\Controllers\Api\NewsletterSubscriberController;
+use App\Modules\Reservation\Http\Controllers\ReservationController;
 
 Route::prefix('v1')->group(function () {
     // Public Newsletter Subscribe
@@ -31,7 +31,10 @@ Route::prefix('v1')->group(function () {
     // Auth Routes
     Route::post('api-login', [AuthController::class, 'apiLogin']);
     // Route::post('logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
-        Route::get('user', [AuthController::class, 'user'])->middleware('auth:sanctum');
+    // Route::get('user', [AuthController::class, 'user'])->middleware('auth:sanctum');
+    Route::post('login', [AuthController::class, 'login']);
+    Route::post('logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
+    Route::get('user', [AuthController::class, 'user'])->middleware('auth:sanctum');
 
     // Settings (admin-only for now)
     Route::get('settings/site', [SettingsController::class, 'showSite'])->middleware(['auth:sanctum', 'role:admin']);
