@@ -3,10 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Media;
-use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Storage;
 
-abstract class BaseMediaController extends Controller
+abstract class BaseMediaController
 {
 
     protected function uploadMedia($model, $files, $collection = 'default', $disk = 'public')
@@ -47,10 +46,7 @@ abstract class BaseMediaController extends Controller
         $existingMedia = $model->media()->where('collection_name', $collection)->get();
 
         if ($existingMedia->isNotEmpty()) {
-
-            $this->deleteMedia(
-                $existingMedia->pluck('id')->toArray()
-            );
+            $this->deleteMedia($existingMedia->pluck('id')->toArray());
         }
 
         return $this->uploadMedia($model, $files, $collection, $disk);

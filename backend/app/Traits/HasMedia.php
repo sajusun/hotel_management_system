@@ -42,7 +42,7 @@ trait HasMedia
     {
 
         $media = $this->firstMedia($collection);
-        return $media?->url;
+        return $media?->url ?? asset('defaults/user-avatar.gif');
     }
 
 

@@ -126,6 +126,9 @@ class UserManagementController extends Controller
             if ($request->has('name')) $user->name = $request->input('name');
             if ($request->has('email')) $user->email = $request->input('email');
             $user->save();
+            if ($request->hasFile('image')) {
+                $this->updateMedia($user, $request->file('image'), 'avatars');
+            }
             if ($request->has('roles')) {
                 $user->syncRoles($request->input('roles'));
             }
