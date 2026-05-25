@@ -6,10 +6,8 @@ import {
   CalendarDays,
   BedDouble,
   Receipt,
-  Settings,
   LogOut,
   Shield,
-  Key,
   Menu,
   X,
   Bell,
@@ -18,7 +16,6 @@ import {
   Maximize2,
   Minimize2,
   User,
-  FileText,
 } from 'lucide-react';
 import useAuth from '../auth/useAuth';
 import api from '../lib/axios';

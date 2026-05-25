@@ -57,7 +57,7 @@ export default function RoomFormModal({ open, onClose, onSuccess, room, roomType
   } = useForm({
     resolver: yupResolver(schema),
     defaultValues: {
-      number: room?.number ?? '',
+      number: String(room?.number ?? ''),
       floor: room?.floor ?? null,
       room_type_id: room?.room_type?.id ?? null,
       status: room?.status ?? 'available',
@@ -69,7 +69,7 @@ export default function RoomFormModal({ open, onClose, onSuccess, room, roomType
   useEffect(() => {
     if (open) {
       reset({
-        number: room?.number ?? '',
+        number: String(room?.number ?? ''),
         floor: room?.floor ?? null,
         room_type_id: room?.room_type?.id ?? null,
         status: room?.status ?? 'available',

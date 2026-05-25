@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Skeleton from 'react-loading-skeleton';
 import api from '../../lib/axios';
 import Pagination from '../../components/Pagination';
@@ -7,7 +7,7 @@ import RoomFormModal from '../../components/RoomFormModal';
 
 type RoomType = {
   id: number;
-  name?: string;
+  name: string;
 };
 
 type Room = {

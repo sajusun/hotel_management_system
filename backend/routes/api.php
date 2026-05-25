@@ -30,11 +30,10 @@ Route::prefix('v1')->group(function () {
 
     // Auth Routes
     Route::post('api-login', [AuthController::class, 'apiLogin']);
-    // Route::post('logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
-    // Route::get('user', [AuthController::class, 'user'])->middleware('auth:sanctum');
     Route::post('login', [AuthController::class, 'login']);
-    Route::post('logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
     Route::get('user', [AuthController::class, 'user'])->middleware('auth:sanctum');
+    Route::post('logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
+
 
     // Settings (admin-only for now)
     Route::get('settings/site', [SettingsController::class, 'showSite'])->middleware(['auth:sanctum', 'role:admin']);

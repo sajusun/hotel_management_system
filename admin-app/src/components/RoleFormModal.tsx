@@ -1,6 +1,6 @@
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
-import { createRole } from '../../api/users';
+import { createRole } from '../api/users';
 import Modal from './Modal';
 import * as yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -36,7 +36,7 @@ const RoleFormModal: React.FC<RoleFormModalProps> = ({ isOpen, onClose, onCreate
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Create New Role">
+    <Modal open={isOpen} onClose={onClose} title="Create New Role">
       <form onSubmit={handleSubmit(onSubmit)}>
         <div className="mb-4">
           <label htmlFor="role-name" className="block mb-1 font-medium">
