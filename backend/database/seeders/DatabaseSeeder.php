@@ -22,6 +22,8 @@ class DatabaseSeeder extends Seeder
         $this->call([
             RolesAndPermissionsSeeder::class,
             HmsSeeder::class,
+            TagsTableSeeder::class,
+            AmenitiesTableSeeder::class,
         ]);
 
         // Optionally, create an admin user

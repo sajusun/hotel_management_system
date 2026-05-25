@@ -3,9 +3,11 @@
 namespace Database\Seeders;
 
 use App\Modules\Guest\Models\Guest;
-use App\Modules\Room\Models\Room;
+use App\Models\Room;
 use App\Modules\Room\Models\RoomType;
 use App\Modules\Shared\Enums\RoomStatus;
+use App\Models\Amenity;
+use App\Models\Tag;
 use Illuminate\Database\Seeder;
 
 class HmsSeeder extends Seeder
@@ -35,12 +37,20 @@ class HmsSeeder extends Seeder
 
         foreach ([$standard, $deluxe, $suite] as $index => $type) {
             for ($i = 1; $i <= 5; $i++) {
-                Room::query()->create([
+                $room = Room::query()->create([
                     'room_type_id' => $type->id,
-                    'number' => strtoupper(substr($type->name, 0, 1)).($index * 100 + $i),
+                    'description' => $type->description,
+                    'number' => strtoupper(substr($type->name, 0, 1)) . ($index * 100 + $i),
                     'floor' => $index + 1,
                     'status' => RoomStatus::Available,
+                    'is_visible' => true,
+                    'notes' => 'Room ' . $i . ' of type ' . $type->name,
                 ]);
+                // Attach random amenities (2) and tags (2) to the room
+                $amenityIds = Amenity::inRandomOrder()->limit(2)->pluck('id');
+                $tagIds = Tag::inRandomOrder()->limit(2)->pluck('id');
+                $room->amenities()->attach($amenityIds);
+                $room->tags()->attach($tagIds);
             }
         }
 
