@@ -1,8 +1,8 @@
 <?php
 
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Database\Migrations\Migration;
 
 return new class extends Migration
 {
@@ -13,12 +13,8 @@ return new class extends Migration
     {
         Schema::create('room_tag', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('room_id')
-                  ->constrained('rooms')
-                  ->onDelete('cascade');
-            $table->foreignId('tag_id')
-                  ->constrained('tags')
-                  ->onDelete('cascade');
+            $table->foreignId('room_id')->constrained('rooms')->onDelete('cascade');
+            $table->foreignId('tag_id')->constrained('tags')->onDelete('cascade');
             $table->timestamps();
             $table->unique(['room_id', 'tag_id']);
         });
