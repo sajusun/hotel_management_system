@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\SupportController;
 use App\Http\Controllers\Api\SettingsController;
 use App\Http\Controllers\Api\V1\AuditController;
 use App\Http\Controllers\Api\NotificationsController;
+use App\Http\Controllers\Api\DashboardController;
 use App\Modules\Auth\Http\Controllers\AuthController;
 use App\Modules\Room\Http\Controllers\RoomController;
 use App\Modules\Stay\Http\Controllers\StayController;
@@ -65,6 +66,9 @@ Route::prefix('v1')->group(function () {
         Route::get('notifications', [NotificationsController::class, 'index']);
         Route::post('notifications/{id}/read', [NotificationsController::class, 'markAsRead']);
         Route::post('notifications/read-all', [NotificationsController::class, 'markAllAsRead']);
+
+        // Dashboard
+        Route::get('dashboard/stats', [DashboardController::class, 'stats']);
 
         // Rooms
         Route::get('rooms', [RoomController::class, 'index']);
