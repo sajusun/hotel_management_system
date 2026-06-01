@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
 import { DollarSign, FileText, Plus, Receipt, User, CreditCard, CheckCircle } from 'lucide-react';
+import { toast } from 'react-hot-toast';
 import api from '../../lib/axios';
 import Modal from '../../components/Modal';
 import FormField from '../../components/FormField';
 import Pagination from '../../components/Pagination';
 import type { LaravelPaginated } from '../../types/pagination';
 import type { Guest } from '../guests/GuestsPage';
+import { initiatePayment } from '../../api/payments';
 
 type InvoiceItem = {
   id: number;
@@ -83,6 +85,17 @@ export default function BillingPage() {
   });
   const [paymentLoading, setPaymentLoading] = useState(false);
 
+  // Online payment modal state
+  const [onlinePaymentModalOpen, setOnlinePaymentModalOpen] = useState(false);
+  const [onlinePaymentForm, setOnlinePaymentForm] = useState<{
+    gateway: 'stripe' | 'paypal';
+    amount: string;
+  }>({
+    gateway: 'stripe',
+    amount: '',
+  });
+  const [onlinePaymentLoading, setOnlinePaymentLoading] = useState(false);
+
   // Fetch invoices
   const fetchInvoices = async () => {
     setLoading(true);
@@ -102,6 +115,26 @@ export default function BillingPage() {
 
   useEffect(() => {
     fetchInvoices();
+
+    // Check if returning from a successful or cancelled online payment gateway
+    const urlParams = new URLSearchParams(window.location.search);
+    const gateway = urlParams.get('gateway');
+    const hasSessionId = urlParams.has('session_id');
+    const hasToken = urlParams.has('token');
+
+    if (gateway) {
+      if (hasSessionId || hasToken) {
+        toast.success(`Online payment via ${gateway.toUpperCase()} completed successfully! The invoice will be updated shortly.`, {
+          duration: 6000,
+        });
+      } else {
+        toast.error('Online payment process was cancelled.', {
+          duration: 5000,
+        });
+      }
+      // Clean up browser address bar without reloading
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
   }, [page, status]);
 
   // Load single invoice details (with items and payments relation loaded)
@@ -188,6 +221,41 @@ export default function BillingPage() {
       alert(err.response?.data?.message || 'Failed to record payment.');
     } finally {
       setPaymentLoading(false);
+    }
+  };
+
+  // Open online payment modal
+  const handleOpenOnlinePayment = () => {
+    if (!selectedInvoice) return;
+    setOnlinePaymentForm({
+      gateway: 'stripe',
+      amount: selectedInvoice.balance_due.toString(),
+    });
+    setOnlinePaymentModalOpen(true);
+  };
+
+  // Submit online payment request
+  const handleOnlinePayment = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedInvoice) return;
+    setOnlinePaymentLoading(true);
+    try {
+      const res = await initiatePayment(
+        selectedInvoice.id,
+        onlinePaymentForm.gateway,
+        parseFloat(onlinePaymentForm.amount)
+      );
+
+      if (res.data.success && res.data.redirect_url) {
+        toast.loading(`Redirecting to ${onlinePaymentForm.gateway === 'stripe' ? 'Stripe Checkout' : 'PayPal'}...`);
+        window.location.href = res.data.redirect_url;
+      } else {
+        toast.error('Failed to initiate online payment session.');
+      }
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || 'Failed to initiate online payment.');
+    } finally {
+      setOnlinePaymentLoading(false);
     }
   };
 
@@ -524,6 +592,13 @@ export default function BillingPage() {
                       >
                         <DollarSign className="w-4 h-4" /> Record Payment
                       </button>
+                      <button
+                        type="button"
+                        onClick={handleOpenOnlinePayment}
+                        className="inline-flex items-center gap-1.5 h-10 px-4 rounded-xl bg-indigo-600 text-white hover:bg-indigo-700 text-sm font-semibold transition-all shadow-sm"
+                      >
+                        <CreditCard className="w-4 h-4" /> Pay Online
+                      </button>
                     </>
                   )}
                   <button
@@ -673,6 +748,84 @@ export default function BillingPage() {
               className="h-10 px-4 rounded-xl bg-slate-900 text-white hover:bg-slate-800 text-sm font-semibold transition-all disabled:opacity-50"
             >
               {paymentLoading ? 'Recording...' : 'Record Payment'}
+            </button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* Online Payment Modal */}
+      <Modal
+        open={onlinePaymentModalOpen}
+        title="Pay Online"
+        onClose={() => setOnlinePaymentModalOpen(false)}
+      >
+        <form onSubmit={handleOnlinePayment} className="space-y-4">
+          <FormField label="Payment Amount ($)" hint={selectedInvoice ? `Max outstanding: $${selectedInvoice.balance_due}` : undefined}>
+            <input
+              type="number"
+              step="0.01"
+              min="0.01"
+              max={selectedInvoice?.balance_due}
+              required
+              placeholder="0.00"
+              value={onlinePaymentForm.amount}
+              onChange={(e) => setOnlinePaymentForm({ ...onlinePaymentForm, amount: e.target.value })}
+              className="w-full h-10 px-3 rounded-lg border border-slate-200 bg-white text-sm"
+            />
+          </FormField>
+
+          <FormField label="Payment Provider">
+            <div className="grid grid-cols-2 gap-4">
+              <label className={`flex flex-col items-center justify-center p-4 rounded-xl border-2 cursor-pointer transition-all ${
+                onlinePaymentForm.gateway === 'stripe'
+                  ? 'border-indigo-655 bg-indigo-50/40 text-indigo-900 font-semibold shadow-sm'
+                  : 'border-slate-200 hover:bg-slate-50 text-slate-650'
+              }`}>
+                <input
+                  type="radio"
+                  name="gateway"
+                  value="stripe"
+                  checked={onlinePaymentForm.gateway === 'stripe'}
+                  onChange={() => setOnlinePaymentForm({ ...onlinePaymentForm, gateway: 'stripe' })}
+                  className="sr-only"
+                />
+                <span className="text-base font-bold text-indigo-650">Stripe</span>
+                <span className="text-[10px] text-slate-400 font-normal mt-0.5">Pay via Credit Card</span>
+              </label>
+
+              <label className={`flex flex-col items-center justify-center p-4 rounded-xl border-2 cursor-pointer transition-all ${
+                onlinePaymentForm.gateway === 'paypal'
+                  ? 'border-indigo-655 bg-indigo-50/40 text-indigo-900 font-semibold shadow-sm'
+                  : 'border-slate-200 hover:bg-slate-50 text-slate-650'
+              }`}>
+                <input
+                  type="radio"
+                  name="gateway"
+                  value="paypal"
+                  checked={onlinePaymentForm.gateway === 'paypal'}
+                  onChange={() => setOnlinePaymentForm({ ...onlinePaymentForm, gateway: 'paypal' })}
+                  className="sr-only"
+                />
+                <span className="text-base font-bold text-yellow-600">PayPal</span>
+                <span className="text-[10px] text-slate-400 font-normal mt-0.5">Pay via PayPal Wallet</span>
+              </label>
+            </div>
+          </FormField>
+
+          <div className="flex justify-end gap-3 pt-4 border-t border-slate-105">
+            <button
+              type="button"
+              onClick={() => setOnlinePaymentModalOpen(false)}
+              className="h-10 px-4 rounded-xl border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 text-sm font-semibold transition-all"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={onlinePaymentLoading}
+              className="h-10 px-4 rounded-xl bg-indigo-600 text-white hover:bg-indigo-700 text-sm font-semibold transition-all disabled:opacity-50 inline-flex items-center gap-1.5 shadow-sm"
+            >
+              {onlinePaymentLoading ? 'Redirecting...' : 'Proceed to Payment'}
             </button>
           </div>
         </form>

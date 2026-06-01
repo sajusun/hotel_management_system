@@ -14,10 +14,15 @@ use App\Modules\Guest\Http\Controllers\GuestController;
 use App\Http\Controllers\Api\V1\UserManagementController;
 use App\Modules\Room\Http\Controllers\RoomTypeController;
 use App\Modules\Billing\Http\Controllers\InvoiceController;
+use App\Modules\Billing\Http\Controllers\PaymentController;
 use App\Http\Controllers\Api\NewsletterSubscriberController;
 use App\Modules\Reservation\Http\Controllers\ReservationController;
 
 Route::prefix('v1')->group(function () {
+    // Public Webhooks
+    Route::post('webhooks/stripe', [PaymentController::class, 'stripeWebhook']);
+    Route::post('webhooks/paypal', [PaymentController::class, 'paypalWebhook']);
+
     // Public Newsletter Subscribe
     Route::post('newsletter/subscribe', [NewsletterSubscriberController::class, 'store']);
 
@@ -107,6 +112,7 @@ Route::prefix('v1')->group(function () {
         Route::post('invoices/{invoice}/services', [InvoiceController::class, 'addServiceCharge']);
         Route::post('invoices/{invoice}/issue', [InvoiceController::class, 'issue']);
         Route::post('invoices/{invoice}/payments', [InvoiceController::class, 'recordPayment']);
+        Route::post('payments/{invoice}/initiate', [PaymentController::class, 'initiate']);
         Route::get('audit-logs', [AuditController::class, 'index'])->middleware(['auth:sanctum', 'role:admin']);
     });
 });
