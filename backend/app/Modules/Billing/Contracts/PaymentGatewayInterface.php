@@ -3,6 +3,7 @@
 namespace App\Modules\Billing\Contracts;
 
 use App\Modules\Billing\DTOs\PaymentSessionData;
+use App\Modules\Billing\DTOs\WebhookResult;
 use App\Modules\Billing\Models\Invoice;
 
 /**

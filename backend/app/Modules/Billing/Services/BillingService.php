@@ -7,6 +7,9 @@ use App\Modules\Billing\DTOs\ServiceChargeData;
 use App\Modules\Billing\Models\Invoice;
 use App\Modules\Billing\Models\InvoiceItem;
 use App\Modules\Billing\Models\Payment;
+use App\Modules\Billing\PaymentGatewayManager;
+use App\Modules\Billing\DTOs\PaymentSessionData;
+use App\Modules\Billing\DTOs\WebhookResult;
 use App\Modules\Billing\Repositories\Contracts\InvoiceRepositoryInterface;
 use App\Modules\Reservation\Services\ReservationService;
 use App\Modules\Shared\Enums\InvoiceStatus;
@@ -14,6 +17,7 @@ use App\Modules\Shared\Enums\PaymentStatus;
 use App\Modules\Stay\Models\Stay;
 use Carbon\CarbonInterface;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class BillingService
@@ -23,6 +27,7 @@ class BillingService
     public function __construct(
         private readonly InvoiceRepositoryInterface $invoices,
         private readonly ReservationService $reservationService,
+        private readonly ?PaymentGatewayManager $gatewayManager = null,
     ) {}
 
     public function calculateNights(CarbonInterface $checkIn, CarbonInterface $checkOut): int
@@ -164,6 +169,103 @@ class BillingService
         ]);
 
         return $invoice->fresh(['items', 'payments', 'stay', 'guest']);
+    }
+
+    public function initiateOnlinePayment(int $invoiceId, string $gatewayName, ?float $amount = null): PaymentSessionData
+    {
+        return DB::transaction(function () use ($invoiceId, $gatewayName, $amount) {
+            $invoice = $this->invoices->findByIdOrFail($invoiceId);
+
+            if ($invoice->status === InvoiceStatus::Paid) {
+                throw new \InvalidArgumentException('This invoice is already paid.');
+            }
+
+            $balanceDue = $invoice->balanceDue();
+            $paymentAmount = $amount ?? $balanceDue;
+
+            if ($paymentAmount <= 0) {
+                throw new \InvalidArgumentException('Payment amount must be greater than zero.');
+            }
+
+            if ($paymentAmount > $balanceDue) {
+                throw new \InvalidArgumentException(
+                    "Payment amount ({$paymentAmount}) exceeds balance due ({$balanceDue})."
+                );
+            }
+
+            $manager = $this->gatewayManager ?? app(PaymentGatewayManager::class);
+            $gateway = $manager->gateway($gatewayName);
+            $sessionData = $gateway->createSession($invoice, $paymentAmount, 'USD');
+
+            // Create a pending online payment record
+            Payment::query()->create([
+                'invoice_id' => $invoice->id,
+                'amount' => $paymentAmount,
+                'method' => $gatewayName,
+                'gateway' => $gatewayName,
+                'session_id' => $sessionData->sessionId,
+                'status' => PaymentStatus::Processing,
+            ]);
+
+            return $sessionData;
+        });
+    }
+
+    public function completeOnlinePayment(WebhookResult $result): ?Payment
+    {
+        return DB::transaction(function () use ($result) {
+            // Find the processing payment
+            $payment = Payment::query()
+                ->where('invoice_id', $result->invoiceId)
+                ->where('gateway', $result->gateway)
+                ->where(function ($query) use ($result) {
+                    $query->where('session_id', $result->transactionReference)
+                          ->orWhere('transaction_reference', $result->transactionReference)
+                          ->orWhere('status', PaymentStatus::Processing);
+                })
+                ->latest()
+                ->first();
+
+            if (!$payment) {
+                Log::warning("No matching processing payment found for webhook", [
+                    'gateway' => $result->gateway,
+                    'invoice_id' => $result->invoiceId,
+                    'transaction_reference' => $result->transactionReference,
+                ]);
+                return null;
+            }
+
+            if ($payment->status === PaymentStatus::Completed) {
+                return $payment; // Already processed
+            }
+
+            $invoice = $this->invoices->findByIdOrFail($result->invoiceId);
+
+            if ($result->status === 'completed') {
+                $payment->update([
+                    'status' => PaymentStatus::Completed,
+                    'transaction_reference' => $result->transactionReference,
+                    'paid_at' => now(),
+                ]);
+
+                $newAmountPaid = (float) $invoice->amount_paid + $payment->amount;
+                $status = $newAmountPaid >= (float) $invoice->total_amount
+                    ? InvoiceStatus::Paid
+                    : $invoice->status;
+
+                $invoice->update([
+                    'amount_paid' => $newAmountPaid,
+                    'status' => $status,
+                ]);
+            } else {
+                $payment->update([
+                    'status' => PaymentStatus::Failed,
+                    'transaction_reference' => $result->transactionReference,
+                ]);
+            }
+
+            return $payment;
+        });
     }
 
     private function generateInvoiceNumber(): string
