@@ -14,12 +14,17 @@ use App\Modules\Room\Repositories\Contracts\RoomTypeRepositoryInterface;
 use App\Modules\Room\Repositories\RoomTypeRepository;
 use App\Modules\Stay\Repositories\Contracts\StayRepositoryInterface;
 use App\Modules\Stay\Repositories\StayRepository;
+use App\Modules\Billing\PaymentGatewayManager;
 use Illuminate\Support\ServiceProvider;
 
 class ModuleServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
+        $this->app->singleton(PaymentGatewayManager::class, function ($app) {
+            return new PaymentGatewayManager();
+        });
+
         $this->app->bind(RoomRepositoryInterface::class, RoomRepository::class);
         $this->app->bind(RoomTypeRepositoryInterface::class, RoomTypeRepository::class);
         $this->app->bind(GuestRepositoryInterface::class, GuestRepository::class);

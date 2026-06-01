@@ -15,7 +15,7 @@ class RecordPaymentRequest extends FormRequest
     {
         return [
             'amount' => ['required', 'numeric', 'min:0.01'],
-            'method' => ['required', 'string', 'in:cash,card,bank_transfer,other'],
+            'method' => ['required', 'string', 'in:cash,card,bank_transfer,other,stripe,paypal'],
             'transaction_reference' => ['nullable', 'string', 'max:100'],
         ];
     }
