@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Users, BedDouble, CalendarCheck, DollarSign, Activity } from 'lucide-react';
+import { BedDouble, CalendarCheck, DollarSign, Activity } from 'lucide-react';
 import { getDashboardStats } from '../api/dashboard';
 import toast from 'react-hot-toast';
 import Skeleton from 'react-loading-skeleton';
@@ -117,7 +117,7 @@ export default function Dashboard() {
                   <YAxis axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 12 }} tickFormatter={(value) => `$${value}`} />
                   <RechartsTooltip 
                     contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
-                    formatter={(value: number) => [`$${value}`, 'Revenue']}
+                    formatter={(value: any) => [`$${value}`, 'Revenue']}
                   />
                   <Area type="monotone" dataKey="revenue" stroke="#6366f1" strokeWidth={3} fillOpacity={1} fill="url(#colorRevenue)" />
                 </AreaChart>
@@ -143,7 +143,7 @@ export default function Dashboard() {
                     dataKey="value"
                     nameKey="status"
                   >
-                    {(data?.room_statuses || []).map((entry, index) => (
+                    {(data?.room_statuses || []).map((_entry, index) => (
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
                   </Pie>
