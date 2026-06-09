@@ -89,8 +89,8 @@ class ReservationService
                 'status' => ReservationStatus::Confirmed,
                 'nightly_rate' => $nightlyRate,
                 'estimated_total' => $estimatedTotal,
-                'special_requests' => $data->specialRequests,
-                'confirmed_at' => now(),
+                'payment_status' => 'pending',
+                'payment_method' => $data->paymentMethod ?? null,
             ]);
 
             $this->rooms->updateStatus($data->roomId, RoomStatus::Reserved);

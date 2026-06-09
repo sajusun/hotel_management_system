@@ -13,5 +13,6 @@ readonly class CreateReservationData
         public CarbonInterface $checkOutDate,
         public int $guestsCount = 1,
         public ?string $specialRequests = null,
+        public ?string $paymentMethod = null,
     ) {}
 }

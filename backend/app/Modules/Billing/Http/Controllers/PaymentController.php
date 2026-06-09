@@ -70,7 +70,29 @@ class PaymentController extends Controller
             $result = $gateway->handleWebhook($payload, $headers);
 
             if ($result) {
-                $this->billingService->completeOnlinePayment($result);
+                // Complete the payment record and update invoice status
+                $payment = $this->billingService->completeOnlinePayment($result);
+
+                // If payment completed, create Stay and generate Invoice if not already present
+                if ($payment && $result->status === 'completed') {
+                    // Load reservation via invoice
+                    $invoice = \App\Modules\Billing\Models\Invoice::find($result->invoiceId);
+                    if ($invoice && $invoice->stay === null) {
+                        $reservation = $invoice->stay ? $invoice->stay->reservation : \App\Modules\Reservation\Models\Reservation::find($invoice->stay->reservation_id);
+                        if ($reservation) {
+                            // Create Stay linked to reservation, room, and guest
+                            $stay = \App\Modules\Stay\Models\Stay::create([
+                                'reservation_id' => $reservation->id,
+                                'room_id' => $reservation->room_id,
+                                'guest_id' => $reservation->guest_id,
+                                'status' => \App\Modules\Shared\Enums\StayStatus::CheckedIn,
+                            ]);
+
+                            // Generate invoice for the stay (includes room charges etc.)
+                            $this->billingService->generateInvoiceForStay($stay);
+                        }
+                    }
+                }
             }
 
             return response()->json(['status' => 'success']);
