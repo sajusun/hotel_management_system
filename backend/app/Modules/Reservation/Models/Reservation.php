@@ -23,6 +23,8 @@ class Reservation extends Model
         'nightly_rate',
         'estimated_total',
         'special_requests',
+        'payment_status',
+        'payment_method',
         'confirmed_at',
         'cancelled_at',
     ];

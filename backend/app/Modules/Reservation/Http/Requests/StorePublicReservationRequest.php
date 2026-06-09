@@ -23,6 +23,7 @@ class StorePublicReservationRequest extends FormRequest
             'check_out_date' => ['required', 'date', 'after:check_in_date'],
             'guests_count' => ['nullable', 'integer', 'min:1', 'max:10'],
             'special_requests' => ['nullable', 'string', 'max:1000'],
+            'payment_method' => ['nullable', 'string'],
         ];
     }
 }
