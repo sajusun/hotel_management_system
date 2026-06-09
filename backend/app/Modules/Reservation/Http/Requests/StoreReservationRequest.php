@@ -19,7 +19,7 @@ class StoreReservationRequest extends FormRequest
             'check_in_date' => ['required', 'date', 'after_or_equal:today'],
             'check_out_date' => ['required', 'date', 'after:check_in_date'],
             'guests_count' => ['nullable', 'integer', 'min:1', 'max:10'],
-            'special_requests' => ['nullable', 'string', 'max:1000'],
+        'payment_method' => ['nullable', 'string', 'in:stripe,paypal,on_arrival'],
         ];
     }
 }
