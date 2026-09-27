@@ -7,6 +7,7 @@ use App\Modules\Reservation\DTOs\AvailabilitySearchData;
 use App\Modules\Reservation\DTOs\CreateReservationData;
 use App\Modules\Reservation\Http\Requests\SearchAvailabilityRequest;
 use App\Modules\Reservation\Http\Requests\StoreReservationRequest;
+use App\Modules\Reservation\Http\Requests\StorePublicReservationRequest;
 use App\Modules\Reservation\Http\Resources\ReservationResource;
 use App\Modules\Reservation\Models\Reservation;
 use App\Modules\Reservation\Repositories\Contracts\ReservationRepositoryInterface;
@@ -15,6 +16,10 @@ use App\Modules\Room\Http\Resources\RoomResource;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use App\Modules\Guest\Models\Guest;
+use App\Models\User;
+use App\Notifications\NewReservation;
+use Illuminate\Support\Facades\Notification;
 
 class ReservationController extends Controller
 {
@@ -64,6 +69,39 @@ class ReservationController extends Controller
                 specialRequests: $request->validated('special_requests'),
             )
         );
+
+        $admins = User::whereIn('role', ['admin', 'help_desk', 'receptionist', 'manager'])->get();
+        Notification::send($admins, new NewReservation($reservation));
+
+        return (new ReservationResource($reservation))
+            ->response()
+            ->setStatusCode(201);
+    }
+
+    public function storePublic(StorePublicReservationRequest $request): JsonResponse
+    {
+        $guest = Guest::firstOrCreate(
+            ['email' => strtolower($request->validated('email'))],
+            [
+                'first_name' => $request->validated('first_name'),
+                'last_name' => $request->validated('last_name'),
+                'phone' => $request->validated('phone'),
+            ]
+        );
+
+        $reservation = $this->reservationService->createReservation(
+            new CreateReservationData(
+                roomId: $request->integer('room_id'),
+                guestId: $guest->id,
+                checkInDate: Carbon::parse($request->validated('check_in_date')),
+                checkOutDate: Carbon::parse($request->validated('check_out_date')),
+                guestsCount: $request->integer('guests_count', 1),
+                specialRequests: $request->validated('special_requests'),
+            )
+        );
+
+        $admins = User::whereIn('role', ['admin', 'help_desk', 'receptionist', 'manager'])->get();
+        Notification::send($admins, new NewReservation($reservation));
 
         return (new ReservationResource($reservation))
             ->response()

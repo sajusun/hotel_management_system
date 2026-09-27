@@ -16,6 +16,7 @@ export type LaravelPaginationLink = {
 
 export type LaravelPaginated<T> = {
   data: T[];
+
   links: {
     first?: string | null;
     last?: string | null;
