@@ -13,15 +13,18 @@ class TagsTableSeeder extends Seeder
     public function run(): void
     {
         $tags = [
-            ['name' => 'Sea View', 'description' => 'Rooms with a view of the sea'],
-            ['name' => 'Family Friendly', 'description' => 'Suitable for families'],
-            ['name' => 'Business', 'description' => 'Business‑oriented amenities'],
-            ['name' => 'Pet Friendly', 'description' => 'Pets allowed'],
-            ['name' => 'Luxury', 'description' => 'High‑end luxury rooms'],
+            ['name' => 'Ocean View', 'description' => 'Direct panoramic view of the ocean shoreline'],
+            ['name' => 'City Skyline', 'description' => 'Spectacular views overlooking the vibrant downtown skyline'],
+            ['name' => 'Family Friendly', 'description' => 'Spacious layout ideal for families with children'],
+            ['name' => 'Executive & Business', 'description' => 'Optimized work station and Executive Lounge access'],
+            ['name' => 'Honeymoon Suite', 'description' => 'Romantic ambiance tailored for couples and newlyweds'],
+            ['name' => 'Accessible / ADA', 'description' => 'Full wheelchair accessibility with roll-in shower'],
+            ['name' => 'High Floor Penthouse', 'description' => 'Top floor exclusive privacy and quiet luxury'],
+            ['name' => 'Pet Friendly', 'description' => 'Accommodates well-behaved domestic pets'],
         ];
 
         foreach ($tags as $data) {
-            Tag::create($data);
+            Tag::firstOrCreate(['name' => $data['name']], $data);
         }
     }
 }
