@@ -37,10 +37,6 @@ export default function Dashboard() {
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchStats();
-  }, []);
-
   const fetchStats = async () => {
     try {
       setLoading(true);
@@ -53,6 +49,10 @@ export default function Dashboard() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchStats();
+  }, []);
 
   const statCards = data ? [
     { title: 'Total Revenue', value: `$${data.stats.revenue_today}`, icon: DollarSign, color: 'text-indigo-600', bg: 'bg-indigo-100', trend: '+12%' },

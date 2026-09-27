@@ -20,7 +20,7 @@ class RoomAmenitiesTagsSeeder extends Seeder
         // Attach a random subset of amenities and tags to each room.
         Room::all()->each(function (Room $room) use ($amenityIds, $tagIds) {
             // Pick 2‑3 random amenities
-            $selectedAmenities = array_rand(array_flip($amenityIds), rand(2, min(3, count($amenityIds)));
+            $selectedAmenities = array_rand(array_flip($amenityIds), rand(2, min(3, count($amenityIds))));
             $room->amenities()->attach($selectedAmenities);
 
             // Pick 1‑2 random tags
