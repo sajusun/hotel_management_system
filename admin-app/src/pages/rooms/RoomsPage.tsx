@@ -1,11 +1,13 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useState, useEffect, useMemo } from 'react';
+import Skeleton from 'react-loading-skeleton';
 import api from '../../lib/axios';
 import Pagination from '../../components/Pagination';
 import type { LaravelPaginated } from '../../types/pagination';
+import RoomFormModal from '../../components/RoomFormModal';
 
 type RoomType = {
   id: number;
-  name?: string;
+  name: string;
 };
 
 type Room = {
@@ -26,6 +28,13 @@ export default function RoomsPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [data, setData] = useState<LaravelPaginated<Room> | null>(null);
+  // Modal state
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingRoom, setEditingRoom] = useState<Room | null>(null);
+  // Room types for dropdown
+  const [roomTypes, setRoomTypes] = useState<RoomType[]>([]);
+  // Simple refresh helper
+  const refresh = () => setPage(1);
 
   const query = useMemo(() => {
     const params = new URLSearchParams();
@@ -54,6 +63,20 @@ export default function RoomsPage() {
     };
   }, [query]);
 
+  // Fetch room types on mount
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await api.get<RoomType[]>('/api/v1/room-types');
+        if (!cancelled) setRoomTypes(res.data);
+      } catch (e) {
+        // ignore silently; could add error handling later
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
   const updateStatus = async (roomId: number, newStatus: string) => {
     const prev = data;
     if (prev) {
@@ -76,6 +99,13 @@ export default function RoomsPage() {
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Rooms</h1>
           <p className="text-sm text-slate-500 mt-1">Manage room status and view inventory.</p>
+        <button
+            type="button"
+            onClick={() => { setEditingRoom(null); setIsModalOpen(true); }}
+            className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"
+          >
+            Create Room
+          </button>
         </div>
 
         <div className="flex flex-col sm:flex-row gap-3">
@@ -131,8 +161,10 @@ export default function RoomsPage() {
         </div>
 
         {loading ? (
-          <div className="p-6 text-sm text-slate-500">Loading…</div>
-        ) : data?.data?.length ? (
+  <div className="p-6 text-sm text-slate-500">
+    <Skeleton height={20} count={5} />
+  </div>
+) : data?.data?.length ? (
           <div>
             <div className="hidden md:block">
               <table className="min-w-full text-sm">
@@ -206,7 +238,15 @@ export default function RoomsPage() {
           <div className="p-6 text-sm text-slate-500">No rooms found.</div>
         )}
       </div>
+
+      {/* Room Create / Edit Modal */}
+      <RoomFormModal
+        open={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSuccess={refresh}
+        room={editingRoom}
+        roomTypes={roomTypes}
+      />
     </div>
   );
 }
-
