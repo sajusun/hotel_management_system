@@ -21,8 +21,11 @@ return new class extends Migration
             $table->id();
             $table->foreignId('room_type_id')->constrained()->cascadeOnDelete();
             $table->string('number')->unique();
+            $table->string('name')->nullable();
+            $table->text('description')->nullable();
             $table->unsignedTinyInteger('floor')->default(1);
             $table->string('status')->default('available');
+            $table->boolean('is_visible')->default(true);
             $table->text('notes')->nullable();
             $table->timestamps();
 

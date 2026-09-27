@@ -8,6 +8,7 @@ use App\Modules\Guest\Http\Requests\UpdateGuestRequest;
 use App\Modules\Guest\Http\Resources\GuestResource;
 use App\Modules\Guest\Models\Guest;
 use App\Modules\Guest\Repositories\Contracts\GuestRepositoryInterface;
+use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class GuestController extends Controller
@@ -16,10 +17,21 @@ class GuestController extends Controller
         private readonly GuestRepositoryInterface $guests,
     ) {}
 
-    public function index(): AnonymousResourceCollection
+    public function index(Request $request): AnonymousResourceCollection
     {
+        $query = Guest::query();
+
+        if ($q = $request->query('q')) {
+            $query->where(function ($sub) use ($q) {
+                $sub->where('first_name', 'like', "%{$q}%")
+                    ->orWhere('last_name', 'like', "%{$q}%")
+                    ->orWhere('email', 'like', "%{$q}%")
+                    ->orWhere('phone', 'like', "%{$q}%");
+            });
+        }
+
         return GuestResource::collection(
-            Guest::query()->orderBy('last_name')->orderBy('first_name')->paginate(20)
+            $query->orderBy('last_name')->orderBy('first_name')->paginate(20)
         );
     }
 

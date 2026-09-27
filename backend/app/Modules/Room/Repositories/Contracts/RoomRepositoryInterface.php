@@ -24,4 +24,10 @@ interface RoomRepositoryInterface
         ?int $roomTypeId = null,
         ?int $excludeReservationId = null,
     ): Collection;
+
+    public function create(array $attributes): Room;
+
+    public function update(int $id, array $attributes): Room;
+
+    public function delete(int $id): bool;
 }

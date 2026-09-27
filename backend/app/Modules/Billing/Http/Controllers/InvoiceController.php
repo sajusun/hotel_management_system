@@ -9,9 +9,11 @@ use App\Modules\Billing\Http\Requests\AddServiceChargeRequest;
 use App\Modules\Billing\Http\Requests\RecordPaymentRequest;
 use App\Modules\Billing\Http\Resources\InvoiceResource;
 use App\Modules\Billing\Http\Resources\PaymentResource;
+use App\Modules\Billing\Models\Invoice;
 use App\Modules\Billing\Repositories\Contracts\InvoiceRepositoryInterface;
 use App\Modules\Billing\Services\BillingService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class InvoiceController extends Controller
 {
@@ -19,6 +21,16 @@ class InvoiceController extends Controller
         private readonly BillingService $billing,
         private readonly InvoiceRepositoryInterface $invoices,
     ) {}
+
+    public function index(): AnonymousResourceCollection
+    {
+        return InvoiceResource::collection(
+            Invoice::query()
+                ->with(['stay.reservation', 'guest'])
+                ->latest()
+                ->paginate(20)
+        );
+    }
 
     public function show(int $invoice): InvoiceResource
     {

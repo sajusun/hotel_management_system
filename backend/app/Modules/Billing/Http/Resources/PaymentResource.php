@@ -16,6 +16,8 @@ class PaymentResource extends JsonResource
             'status' => $this->status->value,
             'transaction_reference' => $this->transaction_reference,
             'paid_at' => $this->paid_at?->toIso8601String(),
+            'gateway' => $this->gateway,
+            'session_id' => $this->session_id,
         ];
     }
 }

@@ -21,7 +21,7 @@ export default function Modal({ open, title, onClose, children }: Props) {
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-[60]">
+    <div role="dialog" aria-modal="true" className="fixed inset-0 z-[60]">
       <button type="button" className="absolute inset-0 bg-slate-900/40" onClick={onClose} aria-label="Close modal" />
       <div className="absolute inset-0 flex items-center justify-center p-4">
         <div className="w-full max-w-lg bg-white rounded-2xl border border-slate-200 shadow-xl overflow-hidden">
