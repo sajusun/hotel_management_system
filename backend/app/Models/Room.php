@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Model;
 use App\Traits\HasMedia;
+use App\Modules\Room\Models\RoomType;
 
 /**
  * Room model – now supports media (primary image + up to 4 gallery images)

@@ -2,9 +2,8 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
-use Illuminate\Database\Seeder;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
 {
@@ -15,23 +14,18 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Seed 10 random users
-        User::factory(10)->create();
-
-        // Seed roles and permissions
         $this->call([
             RolesAndPermissionsSeeder::class,
-            HmsSeeder::class,
-            TagsTableSeeder::class,
+            UserSeeder::class,
             AmenitiesTableSeeder::class,
-        ]);
-
-        // Optionally, create an admin user
-        User::factory()->create([
-            'name' => 'Admin User',
-            'email' => 'admin@hms.com',
-            'password' => bcrypt('password'),
-            'role' => 'admin',
+            TagsTableSeeder::class,
+            HmsSeeder::class,
+            ReservationStaySeeder::class,
+            BillingSeeder::class,
+            SupportSeeder::class,
+            NewsletterSeeder::class,
+            SettingSeeder::class,
+            ActivityLogSeeder::class,
         ]);
     }
 }
